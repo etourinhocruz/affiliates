@@ -73,43 +73,24 @@ export default function LoginPage({ onSuccess }: Props) {
         <div className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[#39FF14]/10 blur-[140px]" />
         <div className="absolute -bottom-40 right-0 h-[24rem] w-[24rem] rounded-full bg-emerald-600/10 blur-[140px]" />
 
-        <div className="relative z-10 flex w-full flex-col justify-between p-14 xl:pl-20 xl:pr-16 xl:py-20">
-          {/* Logo */}
-          <div
-            className="flex items-center gap-4 animate-hero"
-            style={{ animationDelay: '0ms' }}
-          >
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-black p-2 ring-1 ring-[#39FF14]/40 shadow-[0_0_28px_rgba(57,255,20,0.4)]">
-              <img
-                src="/AFFILIATES_LOGO_PNG_(2).png"
-                alt="Mansão Green Affiliates"
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <div className="leading-tight">
-              <p className="text-2xl font-bold tracking-tight text-white">
-                Mansão{' '}
-                <span className="text-[#39FF14] drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">
-                  Green
-                </span>
-              </p>
-              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.38em] text-slate-400">
-                Affiliates
-              </p>
-            </div>
-          </div>
-
+        <div className="relative z-10 flex w-full flex-col justify-center p-14 xl:pl-20 xl:pr-16 xl:py-20">
           {/* Hero copy */}
           <div className="max-w-xl">
-            <span
-              className="inline-flex items-center gap-2 rounded-full border border-[#39FF14]/25 bg-[#39FF14]/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-[#7CFF58] animate-hero backdrop-blur-sm"
-              style={{ animationDelay: '120ms' }}
+            <div
+              className="mb-8 flex animate-hero"
+              style={{ animationDelay: '0ms' }}
             >
-              <Sparkles className="h-3 w-3" /> Programa VIP
-            </span>
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-black p-2 ring-1 ring-[#39FF14]/40 shadow-[0_0_32px_rgba(57,255,20,0.42)]">
+                <img
+                  src="/AFFILIATES_LOGO_PNG_(2).png"
+                  alt="Mansão Green Affiliates"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            </div>
 
             <h1
-              className="mt-8 text-[60px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[78px]"
+              className="text-[60px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[78px]"
               style={{ animationDelay: '220ms' }}
             >
               <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
@@ -192,7 +173,7 @@ export default function LoginPage({ onSuccess }: Props) {
           </div>
 
           <p
-            className="text-xs text-slate-600 animate-hero"
+            className="absolute bottom-10 left-14 text-xs text-slate-600 animate-hero xl:left-20"
             style={{ animationDelay: '620ms' }}
           >
             &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
