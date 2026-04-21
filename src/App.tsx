@@ -2,15 +2,26 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight,
   ArrowUpRight,
+  BarChart3,
+  Briefcase,
+  Cog,
+  FileClock,
   Flame,
   Gem,
+  LayoutDashboard,
   LineChart,
+  Network,
+  PieChart,
+  Settings as SettingsIcon,
+  ShieldCheck,
   Sparkles,
   Trophy,
+  UserCog,
   UserPlus,
+  Users,
   Wallet,
 } from 'lucide-react';
-import Sidebar from './components/Sidebar';
+import Sidebar, { getMenuForRole } from './components/Sidebar';
 import Header from './components/Header';
 import RevenueChart from './components/RevenueChart';
 import SettingsPage from './components/SettingsPage';
@@ -21,6 +32,8 @@ import GamificationPage from './components/GamificationPage';
 import AffiliatesPage from './components/AffiliatesPage';
 import LoginPage from './components/LoginPage';
 import AnimatedNumber from './components/AnimatedNumber';
+import PlaceholderPage from './components/PlaceholderPage';
+import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
@@ -122,8 +135,15 @@ const fallbackSegments: DashboardSegment[] = [
 ];
 
 function App() {
-  const { selectedHouse } = useUser();
-  const [activeMenu, setActiveMenu] = useState('overview');
+  const { selectedHouse, role } = useUser();
+  const [activeMenu, setActiveMenu] = useState<string>(() => getMenuForRole(role)[0].key);
+
+  useEffect(() => {
+    const items = getMenuForRole(role);
+    if (!items.some((i) => i.key === activeMenu)) {
+      setActiveMenu(items[0].key);
+    }
+  }, [role, activeMenu]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [metrics, setMetrics] = useState<DailyMetric[]>(fallbackMetrics);
   const [segments, setSegments] = useState<DashboardSegment[]>(fallbackSegments);
@@ -341,6 +361,140 @@ function App() {
       case 'affiliates':
         return <AffiliatesPage />;
       case 'overview':
+        return renderDashboard();
+
+      case 'admin-dashboard':
+        return <SuperAdminDashboard />;
+      case 'admin-users':
+        return (
+          <PlaceholderPage
+            roleLabel="Super Admin · Gestão de Usuários"
+            title="Gestão de Usuários"
+            subtitle="Controle de contas, permissões e hierarquia da plataforma."
+            icon={UserCog}
+          />
+        );
+      case 'admin-withdrawals':
+        return (
+          <PlaceholderPage
+            roleLabel="Super Admin · Financeiro"
+            title="Aprovação de Saques"
+            subtitle="Fila de saques pendentes para revisão e liberação."
+            icon={ShieldCheck}
+          />
+        );
+      case 'admin-audit':
+        return (
+          <PlaceholderPage
+            roleLabel="Super Admin · Compliance"
+            title="Auditoria"
+            subtitle="Log completo de ações administrativas e integrações."
+            icon={FileClock}
+          />
+        );
+      case 'admin-settings':
+        return (
+          <PlaceholderPage
+            roleLabel="Super Admin · Plataforma"
+            title="Configurações Globais"
+            subtitle="Parâmetros de comissão, integrações e governança."
+            icon={Cog}
+          />
+        );
+
+      case 'agency-overview':
+        return (
+          <PlaceholderPage
+            roleLabel="Agency Suite"
+            title="Visão Geral da Agência"
+            subtitle="Performance consolidada de toda a sua rede de afiliados."
+            icon={LayoutDashboard}
+          />
+        );
+      case 'agency-network':
+        return (
+          <PlaceholderPage
+            roleLabel="Agency Suite"
+            title="Minha Rede"
+            subtitle="Estrutura e performance dos afiliados sob gestão."
+            icon={Network}
+          />
+        );
+      case 'agency-reports':
+        return (
+          <PlaceholderPage
+            roleLabel="Agency Suite"
+            title="Relatórios"
+            subtitle="Analise os resultados agregados da agência."
+            icon={BarChart3}
+          />
+        );
+      case 'agency-settings':
+        return (
+          <PlaceholderPage
+            roleLabel="Agency Suite"
+            title="Configurações"
+            subtitle="Preferências e dados cadastrais da agência."
+            icon={SettingsIcon}
+          />
+        );
+
+      case 'manager-dashboard':
+        return (
+          <PlaceholderPage
+            roleLabel="Manager Suite"
+            title="Dashboard Gerencial"
+            subtitle="Acompanhe o time de afiliados sob sua gestão."
+            icon={Briefcase}
+          />
+        );
+      case 'manager-affiliates':
+        return (
+          <PlaceholderPage
+            roleLabel="Manager Suite"
+            title="Afiliados"
+            subtitle="Gerencie metas, comissões e status dos afiliados."
+            icon={Users}
+          />
+        );
+      case 'manager-settings':
+        return (
+          <PlaceholderPage
+            roleLabel="Manager Suite"
+            title="Configurações"
+            subtitle="Preferências gerenciais e notificações."
+            icon={SettingsIcon}
+          />
+        );
+
+      case 'sub-overview':
+        return (
+          <PlaceholderPage
+            roleLabel="Sub-Afiliado"
+            title="Visão Resumida"
+            subtitle="Resumo simplificado da sua performance."
+            icon={PieChart}
+          />
+        );
+      case 'sub-reports':
+        return (
+          <PlaceholderPage
+            roleLabel="Sub-Afiliado"
+            title="Relatórios"
+            subtitle="Consulte os seus dados de conversão."
+            icon={BarChart3}
+          />
+        );
+      case 'sub-settings':
+        return (
+          <PlaceholderPage
+            roleLabel="Sub-Afiliado"
+            title="Configurações"
+            subtitle="Ajustes da sua conta."
+            icon={SettingsIcon}
+          />
+        );
+
       default:
         return renderDashboard();
     }

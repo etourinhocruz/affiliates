@@ -12,9 +12,29 @@ import {
   Trophy,
   User,
   Wallet,
+  Shield,
+  Building2,
+  Briefcase,
+  UserCog,
+  Users,
+  Eye,
+  ChevronDown,
 } from 'lucide-react';
-import { getInitials, useUser } from '../contexts/UserContext';
+import { getInitials, useUser, type Role } from '../contexts/UserContext';
 import HouseFilter from './HouseFilter';
+
+const ROLE_OPTIONS: {
+  key: Role;
+  label: string;
+  description: string;
+  icon: typeof Shield;
+}[] = [
+  { key: 'SUPER_ADMIN', label: 'Super Admin', description: 'Controle total da plataforma', icon: Shield },
+  { key: 'AGENCY', label: 'Agência', description: 'Gestão da rede da agência', icon: Building2 },
+  { key: 'MANAGER', label: 'Gerente', description: 'Gestão de afiliados do time', icon: Briefcase },
+  { key: 'AFFILIATE', label: 'Afiliado', description: 'Painel do afiliado padrão', icon: UserCog },
+  { key: 'SUB_AFFILIATE', label: 'Sub-Afiliado', description: 'Visão resumida', icon: Users },
+];
 
 type Props = {
   onOpenMobile: () => void;
@@ -81,16 +101,21 @@ function getInitialTheme(): 'light' | 'dark' {
 }
 
 export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
-  const { user, selectedHouse, setSelectedHouse } = useUser();
+  const { user, selectedHouse, setSelectedHouse, role, setRole } = useUser();
   const userName = user.name;
   const initials = getInitials(userName);
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [roleOpen, setRoleOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const roleRef = useRef<HTMLDivElement>(null);
+
+  const currentRole = ROLE_OPTIONS.find((r) => r.key === role) ?? ROLE_OPTIONS[3];
+  const RoleIcon = currentRole.icon;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -106,6 +131,9 @@ export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
       }
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
+        setRoleOpen(false);
       }
     }
     document.addEventListener('mousedown', onClick);
@@ -140,6 +168,90 @@ export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
         </div>
 
         <HouseFilter value={selectedHouse} onChange={setSelectedHouse} />
+
+        <div ref={roleRef} className="relative hidden md:block">
+          <button
+            onClick={() => {
+              setRoleOpen((o) => !o);
+              setNotifOpen(false);
+              setProfileOpen(false);
+            }}
+            className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 backdrop-blur-xl transition-all duration-200 hover:border-neon-400/40 hover:text-neon-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-neon-400/40 dark:hover:text-neon-300"
+          >
+            <Eye className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 lg:inline dark:text-slate-500">
+              Visão:
+            </span>
+            <span className="flex items-center gap-1.5">
+              <RoleIcon className="h-3.5 w-3.5 text-neon-500 dark:text-neon-400" />
+              {currentRole.label}
+            </span>
+            <ChevronDown
+              className={`h-3.5 w-3.5 text-slate-400 transition-transform dark:text-slate-500 ${
+                roleOpen ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+
+          <div
+            className={`absolute right-0 mt-2 w-72 origin-top-right transition-all duration-200 ease-in-out ${
+              roleOpen
+                ? 'pointer-events-auto scale-100 opacity-100 translate-y-0'
+                : 'pointer-events-none scale-95 opacity-0 -translate-y-1'
+            }`}
+          >
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:bg-[#13141A]/90 dark:shadow-black/40 z-50">
+              <div className="border-b border-slate-200 bg-gradient-to-r from-neon-400/5 to-transparent px-4 py-3 dark:border-white/5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neon-600 dark:text-neon-300">
+                  Modo Demonstração
+                </p>
+                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                  Troque a visão para inspecionar a plataforma sob outro perfil.
+                </p>
+              </div>
+              <ul className="max-h-96 overflow-y-auto py-1">
+                {ROLE_OPTIONS.map((opt) => {
+                  const Ico = opt.icon;
+                  const active = opt.key === role;
+                  return (
+                    <li key={opt.key}>
+                      <button
+                        onClick={() => {
+                          setRole(opt.key);
+                          setRoleOpen(false);
+                        }}
+                        className={`flex w-full items-start gap-3 px-4 py-2.5 text-left text-sm transition-colors duration-150 ${
+                          active
+                            ? 'bg-neon-400/10 text-neon-700 dark:text-neon-300'
+                            : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <span
+                          className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ring-1 ${
+                            active
+                              ? 'bg-neon-400/20 text-neon-600 ring-neon-400/40 dark:text-neon-300'
+                              : 'bg-slate-100 text-slate-500 ring-slate-200 dark:bg-white/5 dark:text-slate-400 dark:ring-white/10'
+                          }`}
+                        >
+                          <Ico className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="font-semibold">{opt.label}</span>
+                            {active && <Check className="h-4 w-4 text-neon-500 dark:text-neon-300" />}
+                          </span>
+                          <span className="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-400">
+                            {opt.description}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
 
         <button
           onClick={toggleTheme}
@@ -250,7 +362,7 @@ export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
           >
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-slate-900 dark:text-white">{userName}</p>
-              <p className="text-xs text-slate-500">Afiliado Ouro</p>
+              <p className="text-xs text-slate-500">{user.role}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-neon-400 to-neon-600 text-sm font-bold text-slate-950 shadow-[0_0_16px_rgba(57,255,20,0.35)]">
               {initials}

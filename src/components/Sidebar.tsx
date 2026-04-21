@@ -1,5 +1,23 @@
-import { LayoutDashboard, Megaphone, BarChart3, Wallet, Settings, X, Trophy, Users } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Megaphone,
+  BarChart3,
+  Wallet,
+  Settings,
+  X,
+  Trophy,
+  Users,
+  Shield,
+  ShieldCheck,
+  UserCog,
+  FileClock,
+  Cog,
+  Network,
+  Briefcase,
+  PieChart,
+} from 'lucide-react';
 import SidebarItem from './SidebarItem';
+import { useUser, type Role } from '../contexts/UserContext';
 
 type Props = {
   active: string;
@@ -8,17 +26,54 @@ type Props = {
   onCloseMobile: () => void;
 };
 
-const items = [
-  { key: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
-  { key: 'campaigns', label: 'Campanhas', icon: Megaphone },
-  { key: 'reports', label: 'Relatórios', icon: BarChart3 },
-  { key: 'deals', label: 'Deals Disponíveis', icon: Wallet },
-  { key: 'affiliates', label: 'Meus Afiliados', icon: Users },
-  { key: 'gamification', label: 'Premiações', icon: Trophy },
-  { key: 'settings', label: 'Configurações', icon: Settings },
-];
+export type MenuItem = {
+  key: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+};
+
+const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
+  SUPER_ADMIN: [
+    { key: 'admin-dashboard', label: 'Dashboard Admin', icon: Shield },
+    { key: 'admin-users', label: 'Gestão de Usuários', icon: UserCog },
+    { key: 'admin-withdrawals', label: 'Aprovação de Saques', icon: ShieldCheck },
+    { key: 'admin-audit', label: 'Auditoria', icon: FileClock },
+    { key: 'admin-settings', label: 'Configurações Globais', icon: Cog },
+  ],
+  AGENCY: [
+    { key: 'agency-overview', label: 'Visão Geral da Agência', icon: LayoutDashboard },
+    { key: 'agency-network', label: 'Minha Rede', icon: Network },
+    { key: 'agency-reports', label: 'Relatórios', icon: BarChart3 },
+    { key: 'agency-settings', label: 'Configurações', icon: Settings },
+  ],
+  MANAGER: [
+    { key: 'manager-dashboard', label: 'Dashboard Gerencial', icon: Briefcase },
+    { key: 'manager-affiliates', label: 'Afiliados', icon: Users },
+    { key: 'manager-settings', label: 'Configurações', icon: Settings },
+  ],
+  AFFILIATE: [
+    { key: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
+    { key: 'campaigns', label: 'Campanhas', icon: Megaphone },
+    { key: 'reports', label: 'Relatórios', icon: BarChart3 },
+    { key: 'deals', label: 'Deals Disponíveis', icon: Wallet },
+    { key: 'affiliates', label: 'Meus Afiliados', icon: Users },
+    { key: 'gamification', label: 'Premiações', icon: Trophy },
+    { key: 'settings', label: 'Configurações', icon: Settings },
+  ],
+  SUB_AFFILIATE: [
+    { key: 'sub-overview', label: 'Visão Resumida', icon: PieChart },
+    { key: 'sub-reports', label: 'Relatórios', icon: BarChart3 },
+    { key: 'sub-settings', label: 'Configurações', icon: Settings },
+  ],
+};
+
+export function getMenuForRole(role: Role): MenuItem[] {
+  return MENU_BY_ROLE[role];
+}
 
 export default function Sidebar({ active, onNavigate, mobileOpen, onCloseMobile }: Props) {
+  const { role } = useUser();
+  const items = MENU_BY_ROLE[role];
   return (
     <>
       {mobileOpen && (
@@ -50,7 +105,7 @@ export default function Sidebar({ active, onNavigate, mobileOpen, onCloseMobile 
                 </span>
               </p>
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gray-500 dark:text-slate-300">
-                Affiliates
+                {roleBadge(role)}
               </p>
             </div>
           </div>
@@ -94,4 +149,20 @@ export default function Sidebar({ active, onNavigate, mobileOpen, onCloseMobile 
       </aside>
     </>
   );
+}
+
+function roleBadge(role: Role): string {
+  switch (role) {
+    case 'SUPER_ADMIN':
+      return 'Admin Console';
+    case 'AGENCY':
+      return 'Agency Suite';
+    case 'MANAGER':
+      return 'Manager Suite';
+    case 'SUB_AFFILIATE':
+      return 'Sub-Afiliado';
+    case 'AFFILIATE':
+    default:
+      return 'Affiliates';
+  }
 }
