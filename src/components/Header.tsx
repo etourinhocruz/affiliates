@@ -14,6 +14,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { getInitials, useUser } from '../contexts/UserContext';
+import HouseFilter from './HouseFilter';
 
 type Props = {
   onOpenMobile: () => void;
@@ -80,7 +81,7 @@ function getInitialTheme(): 'light' | 'dark' {
 }
 
 export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
-  const { user } = useUser();
+  const { user, selectedHouse, setSelectedHouse } = useUser();
   const userName = user.name;
   const initials = getInitials(userName);
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
@@ -137,6 +138,8 @@ export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
             </span>
           </h1>
         </div>
+
+        <HouseFilter value={selectedHouse} onChange={setSelectedHouse} />
 
         <button
           onClick={toggleTheme}

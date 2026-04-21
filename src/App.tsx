@@ -20,8 +20,8 @@ import CampaignsPage from './components/CampaignsPage';
 import GamificationPage from './components/GamificationPage';
 import AffiliatesPage from './components/AffiliatesPage';
 import LoginPage from './components/LoginPage';
-import HouseFilter from './components/HouseFilter';
 import AnimatedNumber from './components/AnimatedNumber';
+import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
 import { fallbackMetrics } from './data/mockData';
@@ -56,7 +56,7 @@ const fallbackSegments: DashboardSegment[] = [
   },
   {
     house_key: 'superbet',
-    label: 'Superbet',
+    label: 'SuperBet',
     cadastros: 850,
     ftd: 300,
     qftd: 240,
@@ -66,19 +66,6 @@ const fallbackSegments: DashboardSegment[] = [
     rev_commission: 4900,
     cadastros_yesterday: 760,
     sort_order: 2,
-  },
-  {
-    house_key: 'sportingbet',
-    label: 'Sportingbet',
-    cadastros: 385,
-    ftd: 128,
-    qftd: 102,
-    deposito_total: 44910,
-    net_revenue: 13300,
-    cpa_commission: 5220,
-    rev_commission: 1680,
-    cadastros_yesterday: 348,
-    sort_order: 3,
   },
   {
     house_key: 'betmgm',
@@ -94,8 +81,21 @@ const fallbackSegments: DashboardSegment[] = [
     sort_order: 4,
   },
   {
+    house_key: 'esportivabet',
+    label: 'EsportivaBet',
+    cadastros: 232,
+    ftd: 78,
+    qftd: 62,
+    deposito_total: 26820,
+    net_revenue: 9400,
+    cpa_commission: 3450,
+    rev_commission: 1150,
+    cadastros_yesterday: 210,
+    sort_order: 5,
+  },
+  {
     house_key: 'betfair',
-    label: 'Betfair',
+    label: 'BetFair',
     cadastros: 198,
     ftd: 68,
     qftd: 55,
@@ -104,16 +104,29 @@ const fallbackSegments: DashboardSegment[] = [
     cpa_commission: 2900,
     rev_commission: 980,
     cadastros_yesterday: 172,
-    sort_order: 5,
+    sort_order: 6,
+  },
+  {
+    house_key: 'novibet',
+    label: 'NoviBet',
+    cadastros: 164,
+    ftd: 56,
+    qftd: 45,
+    deposito_total: 18720,
+    net_revenue: 6600,
+    cpa_commission: 2450,
+    rev_commission: 820,
+    cadastros_yesterday: 148,
+    sort_order: 7,
   },
 ];
 
 function App() {
+  const { selectedHouse } = useUser();
   const [activeMenu, setActiveMenu] = useState('overview');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [metrics, setMetrics] = useState<DailyMetric[]>(fallbackMetrics);
   const [segments, setSegments] = useState<DashboardSegment[]>(fallbackSegments);
-  const [selectedHouse, setSelectedHouse] = useState<string>('all');
   const [authed, setAuthed] = useState<boolean>(
     () =>
       typeof window !== 'undefined' &&
@@ -208,30 +221,20 @@ function App() {
 
   const formatInt = (v: number) => Math.round(v).toLocaleString('pt-BR');
 
-  const filterOptions = segments.map((s) => ({ key: s.house_key, label: s.label }));
-
   const renderDashboard = () => (
     <>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="animate-rise" style={{ animationDelay: '0ms' }}>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            Visão Geral
-          </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-            Acompanhe suas métricas de afiliação em tempo real.
-          </p>
-        </div>
-
-        <div
-          className="animate-rise"
-          style={{ animationDelay: '40ms' }}
-        >
-          <HouseFilter
-            value={selectedHouse}
-            onChange={setSelectedHouse}
-            options={filterOptions}
-          />
-        </div>
+      <div className="mb-8 animate-rise" style={{ animationDelay: '0ms' }}>
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+          Visão Geral
+        </h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          Acompanhe suas métricas de afiliação em tempo real.
+          {segment.house_key !== 'all' && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-neon-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neon-600 ring-1 ring-neon-400/30 dark:text-neon-300">
+              {segment.label}
+            </span>
+          )}
+        </p>
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">

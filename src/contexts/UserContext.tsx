@@ -19,6 +19,8 @@ type UserContextValue = {
   user: User;
   setUser: (user: User) => void;
   updateUser: (patch: Partial<User>) => void;
+  selectedHouse: string;
+  setSelectedHouse: (key: string) => void;
 };
 
 const defaultUser: User = {
@@ -29,19 +31,34 @@ const defaultUser: User = {
   pixType: 'cpf',
 };
 
+const HOUSE_STORAGE_KEY = 'mg-selected-house';
+
+function getInitialHouse(): string {
+  if (typeof window === 'undefined') return 'all';
+  return window.localStorage.getItem(HOUSE_STORAGE_KEY) ?? 'all';
+}
+
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(defaultUser);
+  const [selectedHouse, setSelectedHouseState] = useState<string>(getInitialHouse);
 
   const updateUser = useCallback(
     (patch: Partial<User>) => setUser((u) => ({ ...u, ...patch })),
     [],
   );
 
+  const setSelectedHouse = useCallback((key: string) => {
+    setSelectedHouseState(key);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(HOUSE_STORAGE_KEY, key);
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ user, setUser, updateUser }),
-    [user, updateUser],
+    () => ({ user, setUser, updateUser, selectedHouse, setSelectedHouse }),
+    [user, updateUser, selectedHouse, setSelectedHouse],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
