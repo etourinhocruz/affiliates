@@ -17,6 +17,7 @@ import SettingsPage from './components/SettingsPage';
 import DealsPage from './components/DealsPage';
 import ReportsPage from './components/ReportsPage';
 import CampaignsPage from './components/CampaignsPage';
+import GamificationPage from './components/GamificationPage';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
 import { fallbackMetrics } from './data/mockData';
@@ -183,6 +184,8 @@ function App() {
         return <ReportsPage />;
       case 'campaigns':
         return <CampaignsPage />;
+      case 'gamification':
+        return <GamificationPage />;
       case 'overview':
       default:
         return renderDashboard();

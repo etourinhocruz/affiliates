@@ -1,4 +1,4 @@
-import { LayoutDashboard, Megaphone, BarChart3, Wallet, Settings, X } from 'lucide-react';
+import { LayoutDashboard, Megaphone, BarChart3, Wallet, Settings, X, Trophy } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 
 type Props = {
@@ -13,6 +13,7 @@ const items = [
   { key: 'campaigns', label: 'Campanhas', icon: Megaphone },
   { key: 'reports', label: 'Relatórios', icon: BarChart3 },
   { key: 'deals', label: 'Deals Disponíveis', icon: Wallet },
+  { key: 'gamification', label: 'Premiações', icon: Trophy },
   { key: 'settings', label: 'Configurações', icon: Settings },
 ];
 
