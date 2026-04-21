@@ -347,7 +347,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F8] text-gray-900 transition-colors duration-300 dark:bg-[#0B0E14] dark:text-slate-200">
+    <div className="min-h-screen bg-[#F0F2F5] text-gray-900 transition-colors duration-300 dark:bg-[#0B0E14] dark:text-slate-200">
       <div className="pointer-events-none fixed inset-0 hidden overflow-hidden dark:block">
         <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-neon-400/10 blur-3xl" />
         <div className="absolute top-1/2 -left-40 h-96 w-96 rounded-full bg-sky-500/5 blur-3xl" />
@@ -391,7 +391,7 @@ function Pillar({
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className="group relative animate-rise overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-colors duration-200 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(15,23,42,0.12)] dark:border-gray-800 dark:bg-[#1E1E24] dark:hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
+      className="group relative animate-rise overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_38px_-10px_rgba(15,23,42,0.12)] dark:border-gray-800 dark:bg-[#1E1E24] dark:shadow-none dark:hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
     >
       <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition-all duration-300 group-hover:via-neon-400/70 group-hover:shadow-[0_0_14px_rgba(57,255,20,0.5)]" />
       <div className="flex items-center justify-between">
@@ -405,7 +405,7 @@ function Pillar({
       <p className="mt-3 text-2xl font-bold tabular-nums text-gray-900 dark:text-white sm:text-[26px]">
         {value}
       </p>
-      <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">{footer}</div>
+      <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-800">{footer}</div>
     </div>
   );
 }
@@ -417,8 +417,8 @@ function DeltaBadge({ delta, suffix }: { delta: number; suffix?: string }) {
       <span
         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
           positive
-            ? 'bg-neon-400/15 text-neon-700 ring-1 ring-neon-400/40 dark:bg-neon-400/10 dark:text-neon-300 dark:ring-neon-400/30'
-            : 'bg-rose-500/10 text-rose-700 ring-1 ring-rose-400/30 dark:text-rose-300'
+            ? 'bg-gray-900 text-[#39FF14] shadow-[0_0_10px_rgba(57,255,20,0.15)] dark:bg-neon-400/10 dark:text-neon-300 dark:shadow-none dark:ring-1 dark:ring-neon-400/30'
+            : 'bg-gray-900 text-rose-400 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-1 dark:ring-rose-400/30'
         }`}
       >
         {positive ? (
@@ -473,7 +473,7 @@ function FinancialPanel({
   format: (v: number) => string;
 }) {
   return (
-    <div className="w-full rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-[#1E1E24] flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+    <div className="w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-colors duration-200 dark:border-gray-800 dark:bg-[#1E1E24] dark:shadow-none flex flex-col md:flex-row md:items-stretch md:justify-between gap-6">
       <div className="flex flex-1 flex-col gap-6 sm:flex-row sm:gap-10">
         <div className="flex-1">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
@@ -485,7 +485,7 @@ function FinancialPanel({
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Valor fixo por jogador qualificado</p>
         </div>
 
-        <div className="flex-1 sm:border-l sm:border-gray-100 sm:pl-10 dark:sm:border-gray-800">
+        <div className="flex-1 sm:border-l sm:border-gray-200 sm:pl-10 dark:sm:border-gray-800">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
             <Sparkles className="h-3 w-3" /> Comissões REV
           </p>
@@ -496,14 +496,16 @@ function FinancialPanel({
         </div>
       </div>
 
-      <div className="md:text-right md:border-l md:border-gray-100 md:pl-10 dark:md:border-gray-800">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+      <div className="relative overflow-hidden rounded-xl bg-gray-900 p-5 text-right ring-1 ring-gray-900 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.45)] md:min-w-[280px] dark:ring-white/5">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-neon-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-neon-400/10 blur-3xl" />
+        <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
           Saldo Total Disponível
         </p>
-        <p className="mt-2 text-4xl font-extrabold leading-none tabular-nums text-neon-500 drop-shadow-[0_0_12px_rgba(57,255,20,0.35)] dark:text-neon-300 dark:drop-shadow-[0_0_18px_rgba(57,255,20,0.55)] sm:text-5xl">
+        <p className="relative mt-2 text-4xl font-extrabold leading-none tabular-nums text-[#39FF14] drop-shadow-[0_0_18px_rgba(57,255,20,0.55)] sm:text-5xl">
           <AnimatedNumber value={total} format={format} />
         </p>
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Atualizado em tempo real</p>
+        <p className="relative mt-2 text-xs text-slate-400">Atualizado em tempo real</p>
       </div>
     </div>
   );

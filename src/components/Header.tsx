@@ -120,7 +120,7 @@ export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl transition-colors duration-300 dark:border-white/5 dark:bg-slate-950/70">
+    <header className="sticky top-0 z-30 border-b border-gray-200 bg-white transition-colors duration-300 dark:border-white/5 dark:bg-slate-950/70 dark:backdrop-blur-xl">
       <div className="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6 lg:px-10">
         <button
           onClick={onOpenMobile}
