@@ -4,6 +4,7 @@ import {
   Calendar,
   CalendarClock,
   Check,
+  ChevronDown,
   ChevronRight,
   Clock,
   Filter,
@@ -843,6 +844,169 @@ function HouseSelect({
   );
 }
 
+type GroupedOption = { group: string; items: { value: string; label: string }[] };
+
+function SearchableSelect({
+  value,
+  onChange,
+  groups,
+  placeholder,
+  emptyLabel = 'Nenhum usuário encontrado.',
+  clearable = false,
+  clearLabel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  groups: GroupedOption[];
+  placeholder: string;
+  emptyLabel?: string;
+  clearable?: boolean;
+  clearLabel?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState('');
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selectedLabel = useMemo(() => {
+    for (const g of groups) {
+      const hit = g.items.find((i) => i.value === value);
+      if (hit) return hit.label;
+    }
+    return '';
+  }, [groups, value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    if (!open) setTerm('');
+  }, [open]);
+
+  const normalized = term.trim().toLowerCase();
+  const filteredGroups = useMemo(
+    () =>
+      groups
+        .map((g) => ({
+          group: g.group,
+          items: g.items.filter((i) =>
+            normalized ? i.label.toLowerCase().includes(normalized) : true,
+          ),
+        }))
+        .filter((g) => g.items.length > 0),
+    [groups, normalized],
+  );
+
+  const handleSelect = (val: string) => {
+    onChange(val);
+    setOpen(false);
+    setTerm('');
+  };
+
+  return (
+    <div ref={rootRef} className="relative">
+      <div
+        className={`flex items-center gap-2 rounded-xl border bg-white px-3 py-2.5 transition dark:bg-[#121212] ${
+          open
+            ? 'border-neon-400/60 ring-2 ring-neon-400/20 dark:border-neon-400/60'
+            : 'border-gray-200 dark:border-white/10'
+        }`}
+        onClick={() => {
+          setOpen(true);
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={open ? term : selectedLabel}
+          onFocus={() => setOpen(true)}
+          onChange={(e) => {
+            setTerm(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          placeholder={placeholder}
+          className="flex-1 bg-transparent text-sm font-semibold text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-slate-500"
+        />
+        {value && !open && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange('');
+            }}
+            aria-label="Limpar"
+            className="flex h-5 w-5 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+        {open ? (
+          <Search className="h-4 w-4 text-neon-500 dark:text-neon-400" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-gray-400 dark:text-slate-500" />
+        )}
+      </div>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#1E1E24]">
+          {clearable && (
+            <button
+              type="button"
+              onClick={() => handleSelect('')}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-semibold text-gray-600 transition hover:bg-[#39FF14]/10 hover:text-[#39FF14] dark:text-slate-300"
+            >
+              <X className="h-3.5 w-3.5" />
+              {clearLabel ?? 'Limpar seleção'}
+            </button>
+          )}
+          {filteredGroups.length === 0 ? (
+            <p className="px-3 py-6 text-center text-sm text-gray-500 dark:text-slate-400">
+              {emptyLabel}
+            </p>
+          ) : (
+            filteredGroups.map((g) => (
+              <div key={g.group}>
+                <p className="sticky top-0 bg-gray-50/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500 backdrop-blur dark:bg-[#14141A]/90 dark:text-slate-400">
+                  {g.group}
+                </p>
+                <ul>
+                  {g.items.map((item) => {
+                    const selected = item.value === value;
+                    return (
+                      <li key={item.value}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelect(item.value)}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-[#39FF14]/10 hover:text-[#39FF14] ${
+                            selected
+                              ? 'bg-[#39FF14]/10 text-[#39FF14]'
+                              : 'text-gray-800 dark:text-slate-200'
+                          }`}
+                        >
+                          <span className="truncate">{item.label}</span>
+                          {selected && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TargetSelect({
   value,
   onChange,
@@ -850,25 +1014,21 @@ function TargetSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const groups = useMemo<GroupedOption[]>(
+    () =>
+      TARGET_OPTIONS.map((g) => ({
+        group: g.group,
+        items: g.items.map((i) => ({ value: i, label: i })),
+      })),
+    [],
+  );
   return (
-    <select
+    <SearchableSelect
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={SELECT_CLASS}
-    >
-      <option value="" className={SELECT_OPTION_CLASS}>
-        Selecione um afiliado ou agência...
-      </option>
-      {TARGET_OPTIONS.map((group) => (
-        <optgroup key={group.group} label={group.group}>
-          {group.items.map((item) => (
-            <option key={item} value={item} className={SELECT_OPTION_CLASS}>
-              {item}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-    </select>
+      onChange={onChange}
+      groups={groups}
+      placeholder="Buscar afiliado ou agência..."
+    />
   );
 }
 
@@ -881,21 +1041,25 @@ function ParentSelect({
   onChange: (v: string) => void;
   parents: Deal[];
 }) {
+  const groups = useMemo<GroupedOption[]>(
+    () => [
+      {
+        group: 'Acordos Raiz',
+        items: parents.map((p) => ({ value: p.id, label: p.name })),
+      },
+    ],
+    [parents],
+  );
   return (
-    <select
+    <SearchableSelect
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={SELECT_CLASS}
-    >
-      <option value="" className={SELECT_OPTION_CLASS}>
-        Nenhum (acordo raiz)
-      </option>
-      {parents.map((p) => (
-        <option key={p.id} value={p.id} className={SELECT_OPTION_CLASS}>
-          {p.name}
-        </option>
-      ))}
-    </select>
+      onChange={onChange}
+      groups={groups}
+      placeholder="Nenhum (acordo raiz)"
+      emptyLabel="Nenhum acordo encontrado."
+      clearable
+      clearLabel="Nenhum (acordo raiz)"
+    />
   );
 }
 
