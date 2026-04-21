@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   Sparkles,
   Trophy,
-  UserCog,
   UserPlus,
   Users,
   Wallet,
@@ -34,6 +33,7 @@ import LoginPage from './components/LoginPage';
 import AnimatedNumber from './components/AnimatedNumber';
 import PlaceholderPage from './components/PlaceholderPage';
 import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
+import UsersManagementPage from './components/admin/UsersManagementPage';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
@@ -366,14 +366,7 @@ function App() {
       case 'admin-dashboard':
         return <SuperAdminDashboard />;
       case 'admin-users':
-        return (
-          <PlaceholderPage
-            roleLabel="Super Admin · Gestão de Usuários"
-            title="Gestão de Usuários"
-            subtitle="Controle de contas, permissões e hierarquia da plataforma."
-            icon={UserCog}
-          />
-        );
+        return <UsersManagementPage />;
       case 'admin-withdrawals':
         return (
           <PlaceholderPage
