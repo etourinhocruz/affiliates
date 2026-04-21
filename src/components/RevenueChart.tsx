@@ -22,7 +22,12 @@ import {
 } from 'lucide-react';
 import type { DailyMetric } from '../lib/supabase';
 
-type Props = { data: DailyMetric[] };
+type Props = {
+  data: DailyMetric[];
+  segmentKey?: string;
+  segmentScale?: number;
+  segmentLabel?: string;
+};
 
 const COLORS = {
   cadastros: '#39FF14',
@@ -70,7 +75,12 @@ function buildMockSeries(days: number): Row[] {
   return out;
 }
 
-export default function RevenueChart({ data }: Props) {
+export default function RevenueChart({
+  data,
+  segmentKey = 'all',
+  segmentScale = 1,
+  segmentLabel,
+}: Props) {
   const [periodKey, setPeriodKey] = useState<string>('7d');
   const [open, setOpen] = useState(false);
   const [isDark, setIsDark] = useState(
@@ -93,9 +103,10 @@ export default function RevenueChart({ data }: Props) {
   const period = PERIODS.find((p) => p.key === periodKey) ?? PERIODS[0];
 
   const chartData: Row[] = useMemo(() => {
+    let base: Row[];
     if (data && data.length >= period.days) {
       const slice = data.slice(-period.days);
-      return slice.map((d) => {
+      base = slice.map((d) => {
         const dt = new Date(d.date);
         const cadastros = Math.max(d.clicks, 80);
         const ftd = Math.round(cadastros * 0.34);
@@ -109,9 +120,18 @@ export default function RevenueChart({ data }: Props) {
           comissao: Number(d.revenue) || qftd * 55,
         };
       });
+    } else {
+      base = buildMockSeries(period.days);
     }
-    return buildMockSeries(period.days);
-  }, [data, period]);
+    if (segmentScale === 1) return base;
+    return base.map((row) => ({
+      ...row,
+      cadastros: Math.max(1, Math.round(row.cadastros * segmentScale)),
+      ftd: Math.max(1, Math.round(row.ftd * segmentScale)),
+      qftd: Math.max(1, Math.round(row.qftd * segmentScale)),
+      comissao: Math.max(1, Math.round(row.comissao * segmentScale)),
+    }));
+  }, [data, period, segmentScale]);
 
   const totalComissao = chartData.reduce((s, r) => s + r.comissao, 0);
 
@@ -129,7 +149,14 @@ export default function RevenueChart({ data }: Props) {
           </div>
           <div>
             <h3 className="text-base font-semibold text-gray-900 dark:text-white">Minhas Comissões</h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400">{period.label}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              {period.label}
+              {segmentLabel && segmentKey !== 'all' ? (
+                <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-neon-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neon-600 ring-1 ring-neon-400/30 dark:text-neon-300">
+                  {segmentLabel}
+                </span>
+              ) : null}
+            </p>
           </div>
         </div>
 
@@ -185,7 +212,7 @@ export default function RevenueChart({ data }: Props) {
         </div>
       </div>
 
-      <div className="relative h-80 w-full animate-rise">
+      <div key={`${segmentKey}-${periodKey}`} className="relative h-80 w-full animate-rise">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

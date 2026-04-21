@@ -20,14 +20,100 @@ import CampaignsPage from './components/CampaignsPage';
 import GamificationPage from './components/GamificationPage';
 import AffiliatesPage from './components/AffiliatesPage';
 import LoginPage from './components/LoginPage';
+import HouseFilter from './components/HouseFilter';
+import AnimatedNumber from './components/AnimatedNumber';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
 import { fallbackMetrics } from './data/mockData';
+
+type DashboardSegment = {
+  house_key: string;
+  label: string;
+  cadastros: number;
+  ftd: number;
+  qftd: number;
+  deposito_total: number;
+  net_revenue: number;
+  cpa_commission: number;
+  rev_commission: number;
+  cadastros_yesterday: number;
+  sort_order: number;
+};
+
+const fallbackSegments: DashboardSegment[] = [
+  {
+    house_key: 'all',
+    label: 'Geral',
+    cadastros: 1235,
+    ftd: 428,
+    qftd: 342,
+    deposito_total: 146910,
+    net_revenue: 48300,
+    cpa_commission: 18420,
+    rev_commission: 6580,
+    cadastros_yesterday: 1108,
+    sort_order: 1,
+  },
+  {
+    house_key: 'superbet',
+    label: 'Superbet',
+    cadastros: 850,
+    ftd: 300,
+    qftd: 240,
+    deposito_total: 102000,
+    net_revenue: 35000,
+    cpa_commission: 13200,
+    rev_commission: 4900,
+    cadastros_yesterday: 760,
+    sort_order: 2,
+  },
+  {
+    house_key: 'sportingbet',
+    label: 'Sportingbet',
+    cadastros: 385,
+    ftd: 128,
+    qftd: 102,
+    deposito_total: 44910,
+    net_revenue: 13300,
+    cpa_commission: 5220,
+    rev_commission: 1680,
+    cadastros_yesterday: 348,
+    sort_order: 3,
+  },
+  {
+    house_key: 'betmgm',
+    label: 'BetMGM',
+    cadastros: 276,
+    ftd: 94,
+    qftd: 76,
+    deposito_total: 31480,
+    net_revenue: 11200,
+    cpa_commission: 4100,
+    rev_commission: 1380,
+    cadastros_yesterday: 248,
+    sort_order: 4,
+  },
+  {
+    house_key: 'betfair',
+    label: 'Betfair',
+    cadastros: 198,
+    ftd: 68,
+    qftd: 55,
+    deposito_total: 22050,
+    net_revenue: 8100,
+    cpa_commission: 2900,
+    rev_commission: 980,
+    cadastros_yesterday: 172,
+    sort_order: 5,
+  },
+];
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('overview');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [metrics, setMetrics] = useState<DailyMetric[]>(fallbackMetrics);
+  const [segments, setSegments] = useState<DashboardSegment[]>(fallbackSegments);
+  const [selectedHouse, setSelectedHouse] = useState<string>('all');
   const [authed, setAuthed] = useState<boolean>(
     () =>
       typeof window !== 'undefined' &&
@@ -45,32 +131,54 @@ function App() {
     })();
   }, []);
 
-  const funnel = useMemo(() => {
-    const cadastros = 1235;
-    const cadastrosYesterday = 1108;
-    const cadastrosDelta = ((cadastros - cadastrosYesterday) / cadastrosYesterday) * 100;
-    const ftd = 428;
-    const qftd = 342;
-    const depositoTotal = 146910;
-    const netRevenue = 48300;
-    const cpaCommission = 18420;
-    const revCommission = 6580;
-    const revLiquido = cpaCommission + revCommission;
-    return {
-      cadastros,
-      cadastrosDelta,
-      ftd,
-      ftdConv: (ftd / cadastros) * 100,
-      qftd,
-      qftdConv: (qftd / ftd) * 100,
-      depositoTotal,
-      valuePlayer: depositoTotal / ftd,
-      netRevenue,
-      revLiquido,
-      cpaCommission,
-      revCommission,
-    };
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase
+        .from('dashboard_segments')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (s && s.length) setSegments(s as DashboardSegment[]);
+    })();
   }, []);
+
+  const segment = useMemo(
+    () => segments.find((s) => s.house_key === selectedHouse) ?? segments[0],
+    [segments, selectedHouse],
+  );
+
+  const allSegment = useMemo(
+    () => segments.find((s) => s.house_key === 'all') ?? segments[0],
+    [segments],
+  );
+
+  const funnel = useMemo(() => {
+    const cadastrosDelta =
+      segment.cadastros_yesterday > 0
+        ? ((segment.cadastros - segment.cadastros_yesterday) /
+            segment.cadastros_yesterday) *
+          100
+        : 0;
+    const revLiquido = Number(segment.cpa_commission) + Number(segment.rev_commission);
+    return {
+      cadastros: segment.cadastros,
+      cadastrosDelta,
+      ftd: segment.ftd,
+      ftdConv: segment.cadastros ? (segment.ftd / segment.cadastros) * 100 : 0,
+      qftd: segment.qftd,
+      qftdConv: segment.ftd ? (segment.qftd / segment.ftd) * 100 : 0,
+      depositoTotal: Number(segment.deposito_total),
+      valuePlayer: segment.ftd ? Number(segment.deposito_total) / segment.ftd : 0,
+      netRevenue: Number(segment.net_revenue),
+      revLiquido,
+      cpaCommission: Number(segment.cpa_commission),
+      revCommission: Number(segment.rev_commission),
+    };
+  }, [segment]);
+
+  const segmentScale = useMemo(() => {
+    if (!allSegment || !allSegment.cadastros) return 1;
+    return segment.cadastros / allSegment.cadastros;
+  }, [segment, allSegment]);
 
   const handleLogout = () => {
     localStorage.removeItem('amg.session');
@@ -98,15 +206,32 @@ function App() {
       maximumFractionDigits: 0,
     });
 
+  const formatInt = (v: number) => Math.round(v).toLocaleString('pt-BR');
+
+  const filterOptions = segments.map((s) => ({ key: s.house_key, label: s.label }));
+
   const renderDashboard = () => (
     <>
-      <div className="mb-8 animate-rise" style={{ animationDelay: '0ms' }}>
-        <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-          Visão Geral
-        </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-          Acompanhe suas métricas de afiliação em tempo real.
-        </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="animate-rise" style={{ animationDelay: '0ms' }}>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Visão Geral
+          </h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            Acompanhe suas métricas de afiliação em tempo real.
+          </p>
+        </div>
+
+        <div
+          className="animate-rise"
+          style={{ animationDelay: '40ms' }}
+        >
+          <HouseFilter
+            value={selectedHouse}
+            onChange={setSelectedHouse}
+            options={filterOptions}
+          />
+        </div>
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -114,14 +239,14 @@ function App() {
           delay={60}
           icon={<UserPlus className="h-5 w-5" />}
           label="Cadastros"
-          value={funnel.cadastros.toLocaleString('pt-BR')}
+          value={<AnimatedNumber value={funnel.cadastros} format={formatInt} />}
           footer={<DeltaBadge delta={funnel.cadastrosDelta} suffix="vs ontem" />}
         />
         <Pillar
           delay={120}
           icon={<Flame className="h-5 w-5" />}
           label="FTD"
-          value={funnel.ftd.toLocaleString('pt-BR')}
+          value={<AnimatedNumber value={funnel.ftd} format={formatInt} />}
           footer={
             <FooterMetric
               label="Cadastro → FTD"
@@ -134,7 +259,7 @@ function App() {
           delay={180}
           icon={<Trophy className="h-5 w-5" />}
           label="QFTD"
-          value={funnel.qftd.toLocaleString('pt-BR')}
+          value={<AnimatedNumber value={funnel.qftd} format={formatInt} />}
           footer={
             <FooterMetric
               label="FTD → QFTD"
@@ -147,7 +272,7 @@ function App() {
           delay={240}
           icon={<Wallet className="h-5 w-5" />}
           label="Depósito Total"
-          value={formatBRLCompact(funnel.depositoTotal)}
+          value={<AnimatedNumber value={funnel.depositoTotal} format={formatBRLCompact} />}
           footer={
             <FooterMetric
               label="Value Player"
@@ -161,7 +286,7 @@ function App() {
           delay={300}
           icon={<LineChart className="h-5 w-5" />}
           label="Net Revenue"
-          value={formatBRLCompact(funnel.netRevenue)}
+          value={<AnimatedNumber value={funnel.netRevenue} format={formatBRLCompact} />}
           footer={
             <FooterMetric
               label="Rev Líquido"
@@ -188,7 +313,12 @@ function App() {
         className="mt-6 mb-10 animate-rise"
         style={{ animationDelay: '440ms' }}
       >
-        <RevenueChart data={metrics} />
+        <RevenueChart
+          data={metrics}
+          segmentKey={selectedHouse}
+          segmentScale={segmentScale}
+          segmentLabel={segment.label}
+        />
       </section>
     </>
   );
@@ -251,7 +381,7 @@ function Pillar({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: React.ReactNode;
   footer: React.ReactNode;
   delay?: number;
 }) {
@@ -269,7 +399,9 @@ function Pillar({
           {icon}
         </div>
       </div>
-      <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-[26px]">{value}</p>
+      <p className="mt-3 text-2xl font-bold tabular-nums text-gray-900 dark:text-white sm:text-[26px]">
+        {value}
+      </p>
       <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">{footer}</div>
     </div>
   );
@@ -344,7 +476,9 @@ function FinancialPanel({
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
             <Sparkles className="h-3 w-3" /> Comissões CPA
           </p>
-          <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{format(cpa)}</p>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
+            <AnimatedNumber value={cpa} format={format} />
+          </p>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Valor fixo por jogador qualificado</p>
         </div>
 
@@ -352,7 +486,9 @@ function FinancialPanel({
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
             <Sparkles className="h-3 w-3" /> Comissões REV
           </p>
-          <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{format(rev)}</p>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
+            <AnimatedNumber value={rev} format={format} />
+          </p>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Participação recorrente na receita</p>
         </div>
       </div>
@@ -361,8 +497,8 @@ function FinancialPanel({
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
           Saldo Total Disponível
         </p>
-        <p className="mt-2 text-4xl font-extrabold leading-none text-neon-500 drop-shadow-[0_0_12px_rgba(57,255,20,0.35)] dark:text-neon-300 dark:drop-shadow-[0_0_18px_rgba(57,255,20,0.55)] sm:text-5xl">
-          {format(total)}
+        <p className="mt-2 text-4xl font-extrabold leading-none tabular-nums text-neon-500 drop-shadow-[0_0_12px_rgba(57,255,20,0.35)] dark:text-neon-300 dark:drop-shadow-[0_0_18px_rgba(57,255,20,0.55)] sm:text-5xl">
+          <AnimatedNumber value={total} format={format} />
         </p>
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Atualizado em tempo real</p>
       </div>
