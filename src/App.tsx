@@ -83,10 +83,10 @@ function App() {
   const renderDashboard = () => (
     <>
       <div className="mb-8 animate-rise" style={{ animationDelay: '0ms' }}>
-        <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
           Visão Geral
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Acompanhe suas métricas de afiliação em tempo real.
         </p>
       </div>
@@ -196,9 +196,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
+    <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#0B0E14] dark:text-slate-200">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-neon-400/10 blur-3xl" />
+        <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-neon-400/10 blur-3xl dark:bg-neon-400/10" />
         <div className="absolute top-1/2 -left-40 h-96 w-96 rounded-full bg-sky-500/5 blur-3xl" />
       </div>
 
@@ -236,19 +236,19 @@ function Pillar({
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className="group relative animate-rise overflow-hidden rounded-2xl border border-white/5 bg-[#1E1E24]/70 p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/10 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
+      className="group relative animate-rise overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)] dark:border-gray-800 dark:bg-[#1E1E24]/70 dark:backdrop-blur-md dark:shadow-none dark:hover:border-white/10 dark:hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
     >
       <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition-all duration-300 group-hover:via-neon-400/70 group-hover:shadow-[0_0_14px_rgba(57,255,20,0.5)]" />
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-slate-400">
           {label}
         </p>
-        <div className="rounded-lg bg-white/5 p-2 text-slate-300 transition group-hover:text-neon-300">
+        <div className="rounded-lg bg-gray-100 p-2 text-gray-600 transition group-hover:text-neon-500 dark:bg-white/5 dark:text-slate-300 dark:group-hover:text-neon-300">
           {icon}
         </div>
       </div>
-      <p className="mt-3 text-2xl font-bold text-white sm:text-[26px]">{value}</p>
-      <div className="mt-4 border-t border-white/5 pt-3">{footer}</div>
+      <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-[26px]">{value}</p>
+      <div className="mt-4 border-t border-gray-200 pt-3 dark:border-white/5">{footer}</div>
     </div>
   );
 }
@@ -272,7 +272,7 @@ function DeltaBadge({ delta, suffix }: { delta: number; suffix?: string }) {
         {positive ? '+' : ''}
         {delta.toFixed(1)}%
       </span>
-      {suffix && <span className="text-[11px] text-slate-500">{suffix}</span>}
+      {suffix && <span className="text-[11px] text-gray-500 dark:text-slate-500">{suffix}</span>}
     </div>
   );
 }
@@ -289,13 +289,13 @@ function FooterMetric({
   icon?: React.ReactNode;
 }) {
   const toneMap = {
-    neon: 'text-neon-300 drop-shadow-[0_0_8px_rgba(57,255,20,0.35)]',
-    sky: 'text-sky-300',
-    amber: 'text-amber-300',
+    neon: 'text-neon-600 dark:text-neon-300 dark:drop-shadow-[0_0_8px_rgba(57,255,20,0.35)]',
+    sky: 'text-sky-600 dark:text-sky-300',
+    amber: 'text-amber-600 dark:text-amber-300',
   };
   return (
     <div className="flex items-center justify-between">
-      <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+      <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
         {icon}
         {label}
       </span>
@@ -316,36 +316,36 @@ function FinancialPanel({
   format: (v: number) => string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-[#1A1F1C] via-[#1A1A20] to-[#14201A] p-6 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] transition-all duration-300 sm:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.15)] transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-[#1A1F1C] dark:via-[#1A1A20] dark:to-[#14201A] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] sm:p-8">
       <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-neon-400/5 blur-3xl" />
 
       <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-slate-400">
               <Sparkles className="h-3 w-3" /> Comissões CPA
             </p>
-            <p className="mt-2 text-2xl font-bold text-white">{format(cpa)}</p>
-            <p className="mt-1 text-xs text-slate-500">Valor fixo por jogador qualificado</p>
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{format(cpa)}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-500">Valor fixo por jogador qualificado</p>
           </div>
 
-          <div className="relative sm:pl-6 lg:border-l lg:border-white/5 lg:pl-8">
-            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <div className="relative sm:pl-6 lg:border-l lg:border-gray-200 lg:pl-8 dark:lg:border-white/5">
+            <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-slate-400">
               <Sparkles className="h-3 w-3" /> Comissões REV
             </p>
-            <p className="mt-2 text-2xl font-bold text-white">{format(rev)}</p>
-            <p className="mt-1 text-xs text-slate-500">Participação recorrente na receita</p>
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{format(rev)}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-500">Participação recorrente na receita</p>
           </div>
 
-          <div className="relative sm:col-span-2 lg:col-span-1 lg:border-l lg:border-white/5 lg:pl-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-300">
+          <div className="relative sm:col-span-2 lg:col-span-1 lg:border-l lg:border-gray-200 lg:pl-8 dark:lg:border-white/5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-600 dark:text-neon-300">
               Saldo Total Disponível
             </p>
-            <p className="mt-2 text-4xl font-extrabold leading-none text-neon-300 drop-shadow-[0_0_18px_rgba(57,255,20,0.5)] sm:text-5xl">
+            <p className="mt-2 text-4xl font-extrabold leading-none text-neon-500 drop-shadow-[0_0_18px_rgba(57,255,20,0.35)] dark:text-neon-300 dark:drop-shadow-[0_0_18px_rgba(57,255,20,0.5)] sm:text-5xl">
               {format(total)}
             </p>
-            <p className="mt-2 text-xs text-slate-400">Atualizado em tempo real</p>
+            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">Atualizado em tempo real</p>
           </div>
         </div>
 

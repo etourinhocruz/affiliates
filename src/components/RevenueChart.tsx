@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -73,6 +73,22 @@ function buildMockSeries(days: number): Row[] {
 export default function RevenueChart({ data }: Props) {
   const [periodKey, setPeriodKey] = useState<string>('7d');
   const [open, setOpen] = useState(false);
+  const [isDark, setIsDark] = useState(
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark'),
+  );
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const obs = new MutationObserver(() => setIsDark(el.classList.contains('dark')));
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
+  }, []);
+
+  const axisColor = isDark ? '#64748b' : '#6B7280';
+  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.06)';
+  const tooltipBg = isDark ? 'rgba(10,10,14,0.95)' : 'rgba(255,255,255,0.98)';
+  const tooltipBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)';
+  const tooltipText = isDark ? '#e2e8f0' : '#0f172a';
 
   const period = PERIODS.find((p) => p.key === periodKey) ?? PERIODS[0];
 
@@ -101,35 +117,35 @@ export default function RevenueChart({ data }: Props) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-white/[0.01] p-5 backdrop-blur-xl transition-all duration-300 sm:p-6"
+      className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-white/[0.05] dark:via-white/[0.02] dark:to-white/[0.01] dark:shadow-none dark:backdrop-blur-xl sm:p-6"
     >
       <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-neon-400/5 blur-3xl" />
 
       <div className="relative mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-neon-400/20 to-fuchsia-500/10 ring-1 ring-white/10">
-            <BarChart3 className="h-5 w-5 text-neon-300" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-neon-400/20 to-fuchsia-500/10 ring-1 ring-gray-200 dark:ring-white/10">
+            <BarChart3 className="h-5 w-5 text-neon-600 dark:text-neon-300" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">Minhas Comissões</h3>
-            <p className="text-xs text-slate-400">{period.label}</p>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">Minhas Comissões</h3>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{period.label}</p>
           </div>
         </div>
 
         <div className="relative">
           <button
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/70 px-3.5 py-2 text-xs font-semibold text-slate-200 transition hover:border-neon-400/40 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 transition hover:border-neon-400/40 hover:text-gray-900 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:text-white"
           >
-            <Calendar className="h-4 w-4 text-slate-400" />
+            <Calendar className="h-4 w-4 text-gray-500 dark:text-slate-400" />
             {period.label}
             <ChevronDown
-              className={`h-3.5 w-3.5 text-slate-400 transition ${open ? 'rotate-180' : ''}`}
+              className={`h-3.5 w-3.5 text-gray-500 transition dark:text-slate-400 ${open ? 'rotate-180' : ''}`}
             />
           </button>
           {open && (
-            <div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#14141A] shadow-xl">
+            <div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#14141A]">
               {PERIODS.map((p) => (
                 <button
                   key={p.key}
@@ -139,8 +155,8 @@ export default function RevenueChart({ data }: Props) {
                   }}
                   className={`block w-full px-3.5 py-2 text-left text-xs transition ${
                     p.key === periodKey
-                      ? 'bg-neon-400/10 text-neon-300'
-                      : 'text-slate-300 hover:bg-white/5'
+                      ? 'bg-neon-400/10 text-neon-600 dark:text-neon-300'
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/5'
                   }`}
                 >
                   {p.label}
@@ -198,10 +214,10 @@ export default function RevenueChart({ data }: Props) {
               </filter>
             </defs>
 
-            <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+            <CartesianGrid stroke={gridColor} vertical={false} />
             <XAxis
               dataKey="label"
-              stroke="#64748b"
+              stroke={axisColor}
               fontSize={11}
               tickLine={false}
               axisLine={false}
@@ -209,7 +225,7 @@ export default function RevenueChart({ data }: Props) {
             />
             <YAxis
               yAxisId="left"
-              stroke="#64748b"
+              stroke={axisColor}
               fontSize={11}
               tickLine={false}
               axisLine={false}
@@ -227,12 +243,14 @@ export default function RevenueChart({ data }: Props) {
             />
             <Tooltip
               contentStyle={{
-                background: 'rgba(10,10,14,0.95)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: tooltipBg,
+                border: `1px solid ${tooltipBorder}`,
                 borderRadius: '12px',
-                color: '#e2e8f0',
+                color: tooltipText,
                 fontSize: '12px',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                boxShadow: isDark
+                  ? '0 12px 40px rgba(0,0,0,0.6)'
+                  : '0 12px 40px rgba(15,23,42,0.12)',
               }}
               cursor={false}
               formatter={(value: number, name: string) => {
@@ -304,7 +322,7 @@ function LegendItem({
   label: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 text-xs text-slate-300">
+    <div className="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300">
       <span
         className="h-2.5 w-2.5 rounded-full"
         style={{
@@ -312,10 +330,10 @@ function LegendItem({
           boxShadow: `0 0 10px ${color}66`,
         }}
       />
-      <span className="inline-flex items-center gap-1 text-slate-400" style={{ color }}>
+      <span className="inline-flex items-center gap-1" style={{ color }}>
         {icon}
       </span>
-      <span className="font-medium text-slate-200">{label}</span>
+      <span className="font-medium text-gray-700 dark:text-slate-200">{label}</span>
     </div>
   );
 }
