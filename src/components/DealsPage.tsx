@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   BadgeDollarSign,
-  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Coins,
   Flame,
   Gamepad2,
@@ -22,61 +23,47 @@ type BadgeTone = 'neon' | 'amber' | 'sky' | 'rose' | 'teal';
 
 type BrandConfig = {
   bg: string;
-  glow: string;
-  ring: string;
   badges: { label: string; icon: typeof Flame; tone: BadgeTone }[];
 };
 
 const brandConfig: Record<string, BrandConfig> = {
   SUPERBET: {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(220,38,38,0.28),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(220,38,38,0.55),0_0_36px_rgba(220,38,38,0.18)]',
-    ring: 'hover:border-red-400/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(220,38,38,0.22),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Top Conversão', icon: Flame, tone: 'rose' },
       { label: 'Gamificação', icon: Gamepad2, tone: 'neon' },
     ],
   },
   BETFAIR: {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(255,184,12,0.24),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(255,184,12,0.5),0_0_34px_rgba(255,184,12,0.18)]',
-    ring: 'hover:border-amber-300/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(255,184,12,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Clássico Premium', icon: Trophy, tone: 'amber' },
       { label: 'Alta Retenção', icon: TrendingUp, tone: 'neon' },
     ],
   },
   NOVIBET: {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(16,185,129,0.22),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(16,185,129,0.55),0_0_34px_rgba(16,185,129,0.2)]',
-    ring: 'hover:border-emerald-400/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(16,185,129,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'CPA Progressivo', icon: Zap, tone: 'neon' },
       { label: 'Alto Payout', icon: Sparkles, tone: 'teal' },
     ],
   },
   'BET MGM': {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(250,204,21,0.22),rgba(20,20,20,0.95)_60%,#060606_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(250,204,21,0.5),0_0_36px_rgba(250,204,21,0.18)]',
-    ring: 'hover:border-yellow-300/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(250,204,21,0.18),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Marca Global', icon: Trophy, tone: 'amber' },
       { label: 'Cassino Ao Vivo', icon: Sparkles, tone: 'sky' },
     ],
   },
   'ESPORTIVA BET': {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(59,130,246,0.22),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(59,130,246,0.5),0_0_34px_rgba(59,130,246,0.18)]',
-    ring: 'hover:border-sky-400/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(59,130,246,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Mobile First', icon: Zap, tone: 'sky' },
       { label: 'Alta FTD', icon: Flame, tone: 'rose' },
     ],
   },
   KTO: {
-    bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(57,255,20,0.2),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-    glow: 'hover:shadow-[0_24px_60px_-20px_rgba(57,255,20,0.55),0_0_34px_rgba(57,255,20,0.22)]',
-    ring: 'hover:border-neon-400/50',
+    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(57,255,20,0.18),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Novo no Programa', icon: Sparkles, tone: 'neon' },
       { label: 'Comissão Elevada', icon: TrendingUp, tone: 'amber' },
@@ -85,9 +72,7 @@ const brandConfig: Record<string, BrandConfig> = {
 };
 
 const defaultBrand: BrandConfig = {
-  bg: 'bg-[radial-gradient(circle_at_50%_40%,rgba(57,255,20,0.14),rgba(15,15,18,0.95)_65%,#09090B_100%)]',
-  glow: 'hover:shadow-[0_24px_60px_-20px_rgba(57,255,20,0.45)]',
-  ring: 'hover:border-neon-400/50',
+  bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(57,255,20,0.12),rgba(30,30,36,0)_65%)]',
   badges: [{ label: 'Parceiro Oficial', icon: Sparkles, tone: 'neon' }],
 };
 
@@ -207,6 +192,9 @@ const fallbackDeals: Deal[] = [
 export default function DealsPage() {
   const { user } = useUser();
   const [deals, setDeals] = useState<Deal[]>(fallbackDeals);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [animKey, setAnimKey] = useState(0);
   const [requested, setRequested] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState<Set<string>>(new Set());
 
@@ -231,8 +219,19 @@ export default function DealsPage() {
     })();
   }, [user.email]);
 
-  const requestDeal = async (deal: Deal) => {
-    if (requested.has(deal.id) || pending.has(deal.id)) return;
+  const go = (next: number, dir: 1 | -1) => {
+    setDirection(dir);
+    setCurrentIndex(((next % deals.length) + deals.length) % deals.length);
+    setAnimKey((k) => k + 1);
+  };
+
+  const nextDeal = () => go(currentIndex + 1, 1);
+  const prevDeal = () => go(currentIndex - 1, -1);
+
+  const deal = deals[currentIndex];
+
+  const requestDeal = async () => {
+    if (!deal || requested.has(deal.id) || pending.has(deal.id)) return;
     setPending((p) => new Set(p).add(deal.id));
     const { error } = await supabase.from('deal_requests').insert({
       user_email: user.email,
@@ -240,59 +239,74 @@ export default function DealsPage() {
       status: 'pending',
     });
     setPending((p) => {
-      const next = new Set(p);
-      next.delete(deal.id);
-      return next;
+      const n = new Set(p);
+      n.delete(deal.id);
+      return n;
     });
-    if (!error) {
-      setRequested((prev) => new Set(prev).add(deal.id));
-    }
+    if (!error) setRequested((prev) => new Set(prev).add(deal.id));
   };
 
   return (
     <div className="pb-12">
-      <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neon-400/10 text-neon-400 ring-1 ring-neon-400/30 shadow-[0_0_18px_rgba(57,255,20,0.2)]">
-            <Wallet className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              Deals Disponíveis
-            </h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-              Marketplace Elite — escolha a casa, solicite sua afiliação e comece
-              a converter.
-            </p>
-          </div>
+      <div className="mb-10 flex items-start gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neon-400/10 text-neon-400 ring-1 ring-neon-400/30 shadow-[0_0_18px_rgba(57,255,20,0.2)]">
+          <Wallet className="h-6 w-6" />
         </div>
-
-        <div className="flex items-center gap-3 rounded-2xl border border-gray-200/70 bg-white/80 px-4 py-2.5 text-xs backdrop-blur-xl dark:border-white/5 dark:bg-white/[0.03]">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-neon-400/15 text-neon-500 ring-1 ring-neon-400/30 dark:text-neon-300">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <div className="leading-tight">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-slate-400">
-              Catálogo
-            </p>
-            <p className="font-bold text-gray-900 dark:text-white">
-              {deals.length} casas ativas
-            </p>
-          </div>
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Deals Disponíveis
+          </h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            Escolha a casa de apostas e solicite sua afiliação.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {deals.map((deal, i) => (
+      <div className="relative mx-auto w-full max-w-2xl">
+        <button
+          onClick={prevDeal}
+          aria-label="Deal anterior"
+          className="absolute left-0 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-black/50 p-3 text-slate-300 shadow-lg backdrop-blur-lg transition-all duration-300 hover:-translate-x-[calc(50%+2px)] hover:border-neon-400/50 hover:bg-black/70 hover:text-neon-300 hover:shadow-[0_0_22px_rgba(57,255,20,0.3)] sm:p-3.5"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={nextDeal}
+          aria-label="Próximo deal"
+          className="absolute right-0 top-1/2 z-20 -translate-y-1/2 translate-x-1/2 rounded-full border border-white/10 bg-black/50 p-3 text-slate-300 shadow-lg backdrop-blur-lg transition-all duration-300 hover:translate-x-[calc(50%+2px)] hover:border-neon-400/50 hover:bg-black/70 hover:text-neon-300 hover:shadow-[0_0_22px_rgba(57,255,20,0.3)] sm:p-3.5"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+
+        <div className="overflow-hidden rounded-3xl">
           <DealCard
-            key={deal.id}
+            key={animKey}
             deal={deal}
-            delay={i * 60}
+            direction={direction}
             isRequested={requested.has(deal.id)}
             isPending={pending.has(deal.id)}
-            onRequest={() => requestDeal(deal)}
+            onRequest={requestDeal}
           />
-        ))}
+        </div>
+
+        <div className="mt-6 flex items-center justify-center gap-2">
+          {deals.map((d, i) => (
+            <button
+              key={d.id}
+              onClick={() => go(i, i > currentIndex ? 1 : -1)}
+              aria-label={`Ir para ${d.name}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex
+                  ? 'w-8 bg-neon-400 shadow-[0_0_10px_rgba(57,255,20,0.6)]'
+                  : 'w-1.5 bg-slate-700/80 hover:bg-slate-500'
+              }`}
+            />
+          ))}
+        </div>
+
+        <p className="mt-3 text-center text-xs text-slate-500">
+          {currentIndex + 1} de {deals.length}
+        </p>
       </div>
     </div>
   );
@@ -300,34 +314,31 @@ export default function DealsPage() {
 
 function DealCard({
   deal,
-  delay,
+  direction,
   isRequested,
   isPending,
   onRequest,
 }: {
   deal: Deal;
-  delay: number;
+  direction: 1 | -1;
   isRequested: boolean;
   isPending: boolean;
   onRequest: () => void;
 }) {
   const key = deal.name.toUpperCase();
-  const brand = useMemo(
-    () => brandConfig[key] ?? defaultBrand,
-    [key],
-  );
+  const brand = useMemo(() => brandConfig[key] ?? defaultBrand, [key]);
+
+  const enterClass = direction === 1 ? 'animate-slide-in-right' : 'animate-slide-in-left';
 
   return (
     <article
-      style={{ animationDelay: `${delay}ms` }}
-      className={`group relative flex animate-rise flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#1E1E24]/95 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-neon-400/40 ${brand.glow} ${brand.ring}`}
+      className={`relative overflow-hidden rounded-3xl border border-white/5 bg-[#1E1E24]/90 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl ${enterClass}`}
     >
-      {/* Banner */}
-      <div className={`relative flex h-32 items-center justify-center overflow-hidden ${brand.bg}`}>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.08),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+      <div className={`relative flex h-56 items-center justify-center overflow-hidden ${brand.bg} sm:h-64`}>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.06),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+        <div className="absolute left-4 top-4 flex flex-wrap gap-1.5">
           {brand.badges.map((b) => {
             const Ico = b.icon;
             return (
@@ -342,21 +353,20 @@ function DealCard({
           })}
         </div>
 
-        <div className="relative z-10 flex h-full w-full items-center justify-center px-10 py-6">
+        <div className="relative z-10 flex h-full w-full items-center justify-center px-10">
           <BrandLogo deal={deal} />
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col px-5 pb-5 pt-5">
-        <h3 className="text-lg font-bold tracking-tight text-white">
+      <div className="px-6 pb-7 pt-6 sm:px-8">
+        <h3 className="text-2xl font-bold tracking-tight text-white sm:text-[26px]">
           {deal.name}
         </h3>
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">
+        <p className="mt-1 text-sm text-slate-400">
           Casa parceira oficial da Mansão Green Affiliates.
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Metric
             icon={<BadgeDollarSign className="h-3.5 w-3.5" />}
             label="Deal CPA"
@@ -385,7 +395,7 @@ function DealCard({
           />
         </div>
 
-        <div className="mt-auto pt-6">
+        <div className="mt-7">
           <ActionButton
             requested={isRequested}
             pending={isPending}
@@ -393,8 +403,6 @@ function DealCard({
           />
         </div>
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition-all duration-500 group-hover:via-neon-400/60" />
     </article>
   );
 }
@@ -413,23 +421,17 @@ function Metric({
   muted?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-xl border px-3 py-2.5 transition-colors duration-300 ${
-        highlight
-          ? 'border-neon-400/25 bg-neon-400/[0.06]'
-          : 'border-white/5 bg-white/[0.03]'
-      }`}
-    >
+    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur-md transition-colors duration-300 hover:border-white/20">
       <div
-        className={`flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${
-          highlight ? 'text-neon-300/80' : 'text-slate-500'
+        className={`flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
+          highlight ? 'text-neon-300/80' : 'text-slate-400'
         }`}
       >
         {icon}
         <span>{label}</span>
       </div>
       <p
-        className={`mt-1 text-[15px] font-extrabold leading-none ${
+        className={`mt-1.5 text-base font-extrabold leading-none sm:text-[17px] ${
           muted
             ? 'text-slate-500'
             : highlight
@@ -456,7 +458,7 @@ function ActionButton({
     return (
       <button
         disabled
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-300 opacity-90"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-5 py-3.5 text-sm font-semibold text-amber-300"
       >
         <Hourglass className="h-4 w-4" />
         Em Análise
@@ -468,20 +470,11 @@ function ActionButton({
     <button
       onClick={onClick}
       disabled={pending}
-      className="group/btn relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-neon-400/50 bg-gradient-to-b from-neon-300 via-neon-400 to-neon-600 px-4 py-3 text-sm font-bold text-slate-950 shadow-[0_10px_28px_-10px_rgba(57,255,20,0.55),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:shadow-[0_14px_36px_-10px_rgba(57,255,20,0.7),0_0_28px_rgba(57,255,20,0.45),inset_0_1px_0_rgba(255,255,255,0.45)] disabled:cursor-not-allowed disabled:opacity-80"
+      className="group/btn relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-neon-400/50 bg-gradient-to-b from-neon-300 via-neon-400 to-neon-600 px-5 py-3.5 text-sm font-bold text-slate-950 shadow-[0_10px_28px_-10px_rgba(57,255,20,0.55),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:shadow-[0_14px_36px_-10px_rgba(57,255,20,0.7),0_0_28px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.45)] disabled:cursor-not-allowed disabled:opacity-80"
     >
       <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover/btn:translate-x-full" />
-      {pending ? (
-        <>
-          <CheckCircle2 className="h-4 w-4 animate-pulse" />
-          Enviando...
-        </>
-      ) : (
-        <>
-          <Link2 className="h-4 w-4" />
-          Solicitar Afiliação
-        </>
-      )}
+      <Link2 className="h-4 w-4" />
+      {pending ? 'Enviando...' : 'Solicitar Afiliação'}
     </button>
   );
 }
@@ -502,7 +495,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
       <img
         src="/BETMGM-Logo-Stylish-Presentation-PNG.png"
         alt="BetMGM"
-        className="max-h-20 w-auto object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]"
+        className="max-h-36 w-auto object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.55)] sm:max-h-44"
       />
     );
   }
@@ -511,7 +504,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
       <img
         src="/superbet-logo-0.png"
         alt="Superbet"
-        className="max-h-16 w-auto object-contain drop-shadow-[0_6px_18px_rgba(220,38,38,0.35)]"
+        className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(220,38,38,0.35)] sm:max-h-40"
       />
     );
   }
@@ -520,7 +513,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
       <img
         src="/betfair-logo-0-1536x1536.png"
         alt="betfair"
-        className="max-h-16 w-auto object-contain drop-shadow-[0_6px_16px_rgba(255,184,12,0.35)]"
+        className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(255,184,12,0.3)] sm:max-h-40"
       />
     );
   }
@@ -529,7 +522,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
       <img
         src="/novibet-seeklogo.png"
         alt="novibet"
-        className="max-h-24 w-auto object-contain drop-shadow-[0_8px_18px_rgba(16,185,129,0.4)]"
+        className="max-h-40 w-auto object-contain drop-shadow-[0_10px_24px_rgba(16,185,129,0.4)] sm:max-h-48"
       />
     );
   }
@@ -538,13 +531,13 @@ function BrandLogo({ deal }: { deal: Deal }) {
       <img
         src="/ESPORTIVA_PNG.png"
         alt="EsportivaBet"
-        className="max-h-16 w-auto object-contain drop-shadow-[0_6px_16px_rgba(59,130,246,0.35)]"
+        className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(59,130,246,0.35)] sm:max-h-40"
       />
     );
   }
 
   return (
-    <span className="text-3xl font-black tracking-tight text-white drop-shadow-[0_6px_20px_rgba(57,255,20,0.4)]">
+    <span className="text-4xl font-black tracking-tight text-white drop-shadow-[0_8px_24px_rgba(57,255,20,0.4)] sm:text-5xl">
       {deal.name}
     </span>
   );
