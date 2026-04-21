@@ -34,6 +34,7 @@ import PlaceholderPage from './components/PlaceholderPage';
 import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
 import UsersManagementPage from './components/admin/UsersManagementPage';
 import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
+import DealsManagementPage from './components/admin/DealsManagementPage';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
@@ -369,6 +370,8 @@ function App() {
         return <UsersManagementPage />;
       case 'admin-agencies':
         return <AgenciesManagementPage />;
+      case 'admin-deals':
+        return <DealsManagementPage />;
       case 'admin-audit':
         return (
           <PlaceholderPage
