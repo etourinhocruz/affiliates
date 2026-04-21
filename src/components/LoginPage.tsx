@@ -419,6 +419,3 @@ function Field({
     </div>
   );
 }
-
-
-export default LoginPage
