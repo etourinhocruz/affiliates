@@ -19,6 +19,7 @@ import ReportsPage from './components/ReportsPage';
 import CampaignsPage from './components/CampaignsPage';
 import GamificationPage from './components/GamificationPage';
 import AffiliatesPage from './components/AffiliatesPage';
+import LoginPage from './components/LoginPage';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
 import { fallbackMetrics } from './data/mockData';
@@ -27,6 +28,16 @@ function App() {
   const [activeMenu, setActiveMenu] = useState('overview');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [metrics, setMetrics] = useState<DailyMetric[]>(fallbackMetrics);
+  const [authed, setAuthed] = useState<boolean>(
+    () =>
+      typeof window !== 'undefined' &&
+      (localStorage.getItem('amg.session') === '1' ||
+        sessionStorage.getItem('amg.session') === '1'),
+  );
+
+  if (!authed) {
+    return <LoginPage onSuccess={() => setAuthed(true)} />;
+  }
 
   useEffect(() => {
     (async () => {
