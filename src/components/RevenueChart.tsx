@@ -117,7 +117,7 @@ export default function RevenueChart({ data }: Props) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-white/[0.05] dark:via-white/[0.02] dark:to-white/[0.01] dark:shadow-none dark:backdrop-blur-xl sm:p-6"
+      className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-colors duration-200 dark:border-gray-800 dark:bg-[#1E1E24] sm:p-6"
     >
       <div className="pointer-events-none absolute -right-20 -top-24 hidden h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl dark:block" />
       <div className="pointer-events-none absolute -bottom-24 -left-16 hidden h-64 w-64 rounded-full bg-neon-400/5 blur-3xl dark:block" />
