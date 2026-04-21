@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react';
 
 type Props = {
   onSuccess: () => void;
@@ -25,24 +25,47 @@ export default function LoginPage({ onSuccess }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0B0E14] text-slate-200">
+    <div className="flex min-h-screen w-full bg-black text-slate-200">
+      {/* Left column — Branding / Immersion */}
       <aside className="relative hidden w-1/2 overflow-hidden lg:flex">
-        <div className="absolute inset-0 bg-[#0B0E14]" />
+        {/* Mesh gradient base */}
+        <div className="absolute inset-0 bg-black" />
         <div
-          className="absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
-            backgroundSize: '44px 44px',
+              'radial-gradient(ellipse 80% 60% at 20% 15%, rgba(16,66,40,0.75), transparent 60%), radial-gradient(ellipse 60% 50% at 85% 90%, rgba(6,36,22,0.8), transparent 60%), radial-gradient(ellipse 70% 55% at 50% 50%, rgba(12,48,28,0.55), transparent 65%), linear-gradient(180deg, #030806 0%, #000000 100%)',
           }}
         />
-        <div className="absolute -top-32 -left-20 h-[28rem] w-[28rem] rounded-full bg-neon-400/10 blur-[120px]" />
-        <div className="absolute -bottom-32 -right-10 h-[22rem] w-[22rem] rounded-full bg-emerald-500/10 blur-[120px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(57,255,20,0.08),transparent_60%)]" />
+        {/* Subtle top light sweep */}
+        <div
+          className="absolute -top-40 left-1/2 h-[60%] w-[120%] -translate-x-1/2 opacity-60"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, rgba(57,255,20,0.10) 0%, rgba(57,255,20,0.04) 30%, transparent 70%)',
+          }}
+        />
+        {/* Diagonal grid with mask fade */}
+        <div
+          className="absolute inset-0 opacity-[0.22]"
+          style={{
+            backgroundImage:
+              'linear-gradient(45deg, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(-45deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+            backgroundSize: '56px 56px',
+            WebkitMaskImage:
+              'radial-gradient(ellipse 70% 70% at 40% 40%, black 30%, transparent 75%)',
+            maskImage:
+              'radial-gradient(ellipse 70% 70% at 40% 40%, black 30%, transparent 75%)',
+          }}
+        />
+        {/* Neon orbs */}
+        <div className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[#39FF14]/10 blur-[140px]" />
+        <div className="absolute -bottom-40 right-0 h-[24rem] w-[24rem] rounded-full bg-emerald-600/10 blur-[140px]" />
 
         <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-neon-400/40 shadow-[0_0_22px_rgba(57,255,20,0.35)]">
+          {/* Logo */}
+          <div className="flex items-center gap-3 animate-hero" style={{ animationDelay: '0ms' }}>
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-[#39FF14]/40 shadow-[0_0_22px_rgba(57,255,20,0.35)]">
               <img
                 src="/AFFILIATES_LOGO_PNG_(2).png"
                 alt="Mansão Green Affiliates"
@@ -52,58 +75,135 @@ export default function LoginPage({ onSuccess }: Props) {
             <div className="leading-tight">
               <p className="text-[17px] font-bold tracking-tight text-white">
                 Mansão{' '}
-                <span className="text-neon-400 drop-shadow-[0_0_6px_rgba(57,255,20,0.55)]">
+                <span className="text-[#39FF14] drop-shadow-[0_0_6px_rgba(57,255,20,0.55)]">
                   Green
                 </span>
               </p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-300">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400">
                 Affiliates
               </p>
             </div>
           </div>
 
+          {/* Hero copy */}
           <div className="max-w-xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-neon-400/30 bg-neon-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-neon-300">
+            <span
+              className="inline-flex items-center gap-2 rounded-full border border-[#39FF14]/25 bg-[#39FF14]/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-[#7CFF58] animate-hero backdrop-blur-sm"
+              style={{ animationDelay: '120ms' }}
+            >
               <Sparkles className="h-3 w-3" /> Programa VIP
             </span>
-            <h1 className="mt-6 text-5xl font-extrabold leading-[1.05] tracking-tight text-white xl:text-6xl">
-              A Elite do{' '}
-              <span className="bg-gradient-to-r from-neon-300 via-neon-400 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(57,255,20,0.35)]">
+
+            <h1
+              className="mt-8 text-[64px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[84px]"
+              style={{ animationDelay: '220ms' }}
+            >
+              <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                A Elite do
+              </span>
+              <br />
+              <span className="relative inline-block bg-gradient-to-r from-[#7CFF58] via-[#39FF14] to-emerald-400 bg-clip-text pr-1 text-transparent drop-shadow-[0_0_30px_rgba(57,255,20,0.35)]">
                 iGaming.
               </span>
             </h1>
-            <p className="mt-6 text-base leading-relaxed text-slate-400 xl:text-lg">
-              Gerencie suas campanhas, acompanhe suas comissões em tempo real e desbloqueie prêmios exclusivos.
+
+            <p
+              className="mt-6 max-w-lg text-base leading-relaxed text-slate-400 animate-hero xl:text-[17px]"
+              style={{ animationDelay: '340ms' }}
+            >
+              Gerencie suas campanhas, acompanhe suas comissões em tempo real e
+              desbloqueie prêmios exclusivos no programa mais premium do mercado.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FeatureRow
-                icon={<TrendingUp className="h-4 w-4" />}
-                title="Comissões em tempo real"
-                desc="Dashboard vivo com CPA + RevShare."
-              />
-              <FeatureRow
-                icon={<ShieldCheck className="h-4 w-4" />}
-                title="Parcerias premium"
-                desc="Acesso antecipado às melhores casas."
-              />
+            {/* Floating glass card with minimal growth chart */}
+            <div
+              className="relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-hero"
+              style={{ animationDelay: '460ms' }}
+            >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(57,255,20,0.12),transparent_55%)]" />
+              <div className="relative flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                    Comissão Acumulada
+                  </p>
+                  <p className="mt-2 text-3xl font-extrabold tracking-tight text-white">
+                    R$ 184.320
+                  </p>
+                  <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#7CFF58]">
+                    <ArrowRight className="h-3 w-3 -rotate-45" />
+                    +38,2% este mês
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#39FF14]/10 ring-1 ring-[#39FF14]/30">
+                  <Sparkles className="h-4 w-4 text-[#7CFF58]" />
+                </div>
+              </div>
+
+              <div className="relative mt-5 h-[92px] w-full">
+                <svg
+                  viewBox="0 0 400 100"
+                  preserveAspectRatio="none"
+                  className="h-full w-full overflow-visible"
+                >
+                  <defs>
+                    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#10B981" />
+                      <stop offset="60%" stopColor="#39FF14" />
+                      <stop offset="100%" stopColor="#B6FFA1" />
+                    </linearGradient>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#39FF14" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#39FF14" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4 L400,100 L0,100 Z"
+                    fill="url(#areaGrad)"
+                  />
+                  <path
+                    d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4"
+                    fill="none"
+                    stroke="url(#lineGrad)"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    className="animate-draw drop-shadow-[0_0_10px_rgba(57,255,20,0.6)]"
+                  />
+                  <circle cx="400" cy="4" r="4" fill="#39FF14" className="drop-shadow-[0_0_10px_rgba(57,255,20,0.9)]" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <p className="text-xs text-slate-500">
+          <p
+            className="text-xs text-slate-600 animate-hero"
+            style={{ animationDelay: '620ms' }}
+          >
             &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
           </p>
         </div>
       </aside>
 
-      <section className="relative flex w-full flex-1 items-center justify-center bg-[#121212] px-4 py-12 sm:px-8">
-        <div className="pointer-events-none absolute -top-24 right-10 h-64 w-64 rounded-full bg-neon-400/5 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl" />
+      {/* Right column — Glass vault */}
+      <section className="relative flex w-full flex-1 items-center justify-center bg-black px-4 py-12 sm:px-8">
+        <div className="pointer-events-none absolute inset-0 opacity-60">
+          <div className="absolute -top-40 right-[-10%] h-[32rem] w-[32rem] rounded-full bg-[#39FF14]/[0.04] blur-[140px]" />
+          <div className="absolute bottom-[-20%] left-[-10%] h-[28rem] w-[28rem] rounded-full bg-emerald-500/[0.04] blur-[140px]" />
+        </div>
 
-        <div className="relative w-full max-w-md">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl sm:p-10">
+        <div
+          className="relative w-full max-w-md animate-hero"
+          style={{ animationDelay: '200ms' }}
+        >
+          {/* Outer neon glow */}
+          <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.03] blur-2xl" />
+          <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_50px_rgba(57,255,20,0.05)]" />
+
+          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_50px_rgba(57,255,20,0.05)] backdrop-blur-2xl sm:p-10">
+            {/* top inner highlight */}
+            <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
             <div className="mb-8 text-center lg:hidden">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-neon-400/40">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-[#39FF14]/40">
                 <img
                   src="/AFFILIATES_LOGO_PNG_(2).png"
                   alt="Mansão Green"
@@ -113,7 +213,7 @@ export default function LoginPage({ onSuccess }: Props) {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-white sm:text-[28px]">
+              <h2 className="text-3xl font-bold tracking-tight text-white">
                 Bem-vindo de volta
               </h2>
               <p className="mt-2 text-sm text-slate-400">
@@ -136,18 +236,21 @@ export default function LoginPage({ onSuccess }: Props) {
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <label
+                    htmlFor="password"
+                    className="text-xs font-semibold uppercase tracking-widest text-gray-400"
+                  >
                     Senha
                   </label>
                   <button
                     type="button"
-                    className="text-xs font-medium text-slate-400 transition hover:text-neon-400"
+                    className="text-xs font-medium text-slate-500 transition hover:text-[#39FF14]"
                   >
                     Esqueceu a senha?
                   </button>
                 </div>
                 <div className="group relative">
-                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-neon-400">
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-[#39FF14]">
                     <Lock className="h-4 w-4" />
                   </span>
                   <input
@@ -158,12 +261,12 @@ export default function LoginPage({ onSuccess }: Props) {
                     placeholder="••••••••"
                     autoComplete="current-password"
                     required
-                    className="w-full rounded-xl border border-white/10 bg-black/30 py-3 pl-11 pr-12 text-sm text-white placeholder:text-slate-600 outline-none transition focus:border-[#39FF14] focus:shadow-[0_0_0_4px_rgba(57,255,20,0.12)]"
+                    className="h-14 w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-12 text-sm text-white placeholder:text-slate-600 outline-none transition-all duration-200 focus:border-[#39FF14] focus:ring-1 focus:ring-[#39FF14]/50 focus:shadow-[0_0_0_4px_rgba(57,255,20,0.08)]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition hover:text-neon-400"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition hover:text-[#39FF14]"
                     aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -171,17 +274,17 @@ export default function LoginPage({ onSuccess }: Props) {
                 </div>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-400">
+              <label className="flex cursor-pointer select-none items-center gap-2.5 text-sm text-slate-400">
                 <span className="relative inline-flex">
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                    className="peer h-4 w-4 appearance-none rounded border border-white/15 bg-black/40 transition checked:border-neon-400 checked:bg-neon-400/20 focus:outline-none focus:ring-2 focus:ring-neon-400/40"
+                    className="peer h-4 w-4 appearance-none rounded border border-white/15 bg-black/50 transition checked:border-[#39FF14] checked:bg-[#39FF14]/20 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/40"
                   />
                   <svg
                     viewBox="0 0 16 16"
-                    className="pointer-events-none absolute left-0 top-0 h-4 w-4 scale-0 text-neon-400 transition peer-checked:scale-100"
+                    className="pointer-events-none absolute left-0 top-0 h-4 w-4 scale-0 text-[#39FF14] transition peer-checked:scale-100"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -197,18 +300,22 @@ export default function LoginPage({ onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-neon-400 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-black shadow-[0_10px_30px_-10px_rgba(57,255,20,0.6)] transition-all duration-300 hover:bg-neon-300 hover:shadow-[0_16px_40px_-10px_rgba(57,255,20,0.75)] disabled:cursor-not-allowed disabled:opacity-80"
+                className="group relative mt-2 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#7CFF58]/40 bg-gradient-to-b from-[#7CFF58] via-[#39FF14] to-[#17B800] text-sm font-bold uppercase tracking-[0.22em] text-black shadow-[0_10px_30px_-8px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(57,255,20,0.4),0_18px_40px_-10px_rgba(57,255,20,0.55),inset_0_1px_0_rgba(255,255,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39FF14]/60 disabled:cursor-not-allowed disabled:opacity-85 disabled:hover:translate-y-0"
               >
+                <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.35),transparent_55%)]" />
                 <span
-                  className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-white/30 opacity-0 transition-all duration-700 group-hover:left-[110%] group-hover:opacity-100"
+                  className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-white/40 opacity-0 transition-all duration-700 group-hover:left-[110%] group-hover:opacity-100"
                 />
                 {loading ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-                    Autenticando...
+                    <span className="relative">Autenticando...</span>
                   </>
                 ) : (
-                  'Entrar no Painel'
+                  <span className="relative inline-flex items-center gap-2">
+                    Entrar no Painel
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                  </span>
                 )}
               </button>
             </form>
@@ -217,7 +324,7 @@ export default function LoginPage({ onSuccess }: Props) {
               Ainda não é parceiro?{' '}
               <a
                 href="#"
-                className="font-semibold text-neon-400 transition hover:text-neon-300 hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]"
+                className="font-semibold text-[#39FF14] transition hover:text-[#7CFF58] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]"
               >
                 Solicitar Acesso
               </a>
@@ -256,11 +363,14 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-xs font-semibold uppercase tracking-widest text-gray-400"
+      >
         {label}
       </label>
       <div className="group relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-neon-400">
+        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-[#39FF14]">
           {icon}
         </span>
         <input
@@ -271,30 +381,8 @@ function Field({
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
-          className="w-full rounded-xl border border-white/10 bg-black/30 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-600 outline-none transition focus:border-[#39FF14] focus:shadow-[0_0_0_4px_rgba(57,255,20,0.12)]"
+          className="h-14 w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all duration-200 focus:border-[#39FF14] focus:ring-1 focus:ring-[#39FF14]/50 focus:shadow-[0_0_0_4px_rgba(57,255,20,0.08)]"
         />
-      </div>
-    </div>
-  );
-}
-
-function FeatureRow({
-  icon,
-  title,
-  desc,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-sm">
-      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-neon-400/10 text-neon-300 ring-1 ring-neon-400/30">
-        {icon}
-      </div>
-      <div>
-        <p className="text-sm font-semibold text-white">{title}</p>
-        <p className="mt-0.5 text-xs text-slate-400">{desc}</p>
       </div>
     </div>
   );
