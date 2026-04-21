@@ -35,10 +35,6 @@ function App() {
         sessionStorage.getItem('amg.session') === '1'),
   );
 
-  if (!authed) {
-    return <LoginPage onSuccess={() => setAuthed(true)} />;
-  }
-
   useEffect(() => {
     (async () => {
       const { data: m } = await supabase
@@ -75,6 +71,17 @@ function App() {
       revCommission,
     };
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('amg.session');
+    sessionStorage.removeItem('amg.session');
+    setAuthed(false);
+    setActiveMenu('overview');
+  };
+
+  if (!authed) {
+    return <LoginPage onSuccess={() => setAuthed(true)} />;
+  }
 
   const formatBRL = (v: number) =>
     v.toLocaleString('pt-BR', {
@@ -221,7 +228,11 @@ function App() {
       />
 
       <div className="relative lg:pl-72">
-        <Header userName="Lucas" onOpenMobile={() => setMobileOpen(true)} />
+        <Header
+          onOpenMobile={() => setMobileOpen(true)}
+          onNavigate={setActiveMenu}
+          onLogout={handleLogout}
+        />
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10">
           {renderContent()}

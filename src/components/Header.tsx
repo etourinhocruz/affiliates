@@ -13,10 +13,12 @@ import {
   User,
   Wallet,
 } from 'lucide-react';
+import { getInitials, useUser } from '../contexts/UserContext';
 
 type Props = {
-  userName: string;
   onOpenMobile: () => void;
+  onNavigate?: (tab: string) => void;
+  onLogout?: () => void;
 };
 
 type Notification = {
@@ -77,7 +79,10 @@ function getInitialTheme(): 'light' | 'dark' {
   return 'dark';
 }
 
-export default function Header({ userName, onOpenMobile }: Props) {
+export default function Header({ onOpenMobile, onNavigate, onLogout }: Props) {
+  const { user } = useUser();
+  const userName = user.name;
+  const initials = getInitials(userName);
   const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -245,7 +250,7 @@ export default function Header({ userName, onOpenMobile }: Props) {
               <p className="text-xs text-slate-500">Afiliado Ouro</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-neon-400 to-neon-600 text-sm font-bold text-slate-950 shadow-[0_0_16px_rgba(57,255,20,0.35)]">
-              {userName.slice(0, 2).toUpperCase()}
+              {initials}
             </div>
           </button>
 
@@ -260,15 +265,37 @@ export default function Header({ userName, onOpenMobile }: Props) {
               <div className="border-b border-slate-200 px-4 py-3 dark:border-white/5">
                 <p className="text-sm font-bold text-slate-900 dark:text-white">{userName}</p>
                 <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-neon-600 dark:text-neon-300">
-                  Afiliado Ouro
+                  {user.role}
                 </p>
               </div>
 
-              <ProfileItem icon={User} label="Meu perfil" />
-              <ProfileItem icon={Settings} label="Configurações de conta" />
+              <ProfileItem
+                icon={User}
+                label="Meu perfil"
+                onClick={() => {
+                  setProfileOpen(false);
+                  onNavigate?.('settings');
+                }}
+              />
+              <ProfileItem
+                icon={Settings}
+                label="Configurações de conta"
+                onClick={() => {
+                  setProfileOpen(false);
+                  onNavigate?.('settings');
+                }}
+              />
 
               <div className="border-t border-slate-200 dark:border-white/5">
-                <ProfileItem icon={LogOut} label="Sair" danger />
+                <ProfileItem
+                  icon={LogOut}
+                  label="Sair"
+                  danger
+                  onClick={() => {
+                    setProfileOpen(false);
+                    onLogout?.();
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -282,13 +309,16 @@ function ProfileItem({
   icon: Icon,
   label,
   danger = false,
+  onClick,
 }: {
   icon: typeof Check;
   label: string;
   danger?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
+      onClick={onClick}
       className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out ${
         danger
           ? 'text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10'
