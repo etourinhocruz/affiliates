@@ -2,18 +2,16 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   Calendar,
+  CalendarClock,
   Check,
   ChevronRight,
   Clock,
   Filter,
   Handshake,
   History,
-  Info,
   Pencil,
   Plus,
   Search,
-  TrendingDown,
-  TrendingUp,
   X,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -38,10 +36,49 @@ type Deal = {
 const HOUSE_META: Record<string, { label: string; logo: string }> = {
   superbet: { label: 'SuperBet', logo: '/superbet-logo-0.png' },
   betmgm: { label: 'BetMGM', logo: '/BETMGM-Logo-Stylish-Presentation-PNG.png' },
+  esportivabet: { label: 'EsportivaBet', logo: '/ESPORTIVA_PNG.png' },
   betfair: { label: 'BetFair', logo: '/betfair-logo-0-1536x1536.png' },
   novibet: { label: 'NoviBet', logo: '/novibet-seeklogo.png' },
-  esportivabet: { label: 'EsportivaBet', logo: '/ESPORTIVA_PNG.png' },
 };
+
+const TARGET_OPTIONS: { group: string; items: string[] }[] = [
+  {
+    group: 'Agências',
+    items: [
+      'Agência Tubarões Media',
+      'Agência HighRoller BR',
+      'Agência Sports Hub',
+      'Equipe VIP BR',
+    ],
+  },
+  {
+    group: 'Gerentes',
+    items: ['Marcus Trader', 'Camila Ventura'],
+  },
+  {
+    group: 'Afiliados',
+    items: [
+      'Rodrigo Alves',
+      'Juliana Costa',
+      'Ricardo Picks',
+      'Bruno Tipster',
+    ],
+  },
+  {
+    group: 'Sub-Afiliados',
+    items: ['Carlos Simões', 'Ana Lima', 'Diego Matos'],
+  },
+  {
+    group: 'Genérico',
+    items: ['Affiliates'],
+  },
+];
+
+const SELECT_CLASS =
+  'w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white';
+
+const SELECT_OPTION_CLASS =
+  'bg-white text-gray-800 dark:bg-[#121212] dark:text-slate-200';
 
 const fallbackDeals: Deal[] = [
   {
@@ -109,7 +146,8 @@ export default function DealsManagementPage() {
   const [houseFilter, setHouseFilter] = useState<string>('ALL');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'ROOT' | 'SUB'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'active' | 'scheduled'>('ALL');
-  const [editing, setEditing] = useState<Deal | null>(null);
+  const [updatingVersion, setUpdatingVersion] = useState<Deal | null>(null);
+  const [editingBase, setEditingBase] = useState<Deal | null>(null);
   const [historyFor, setHistoryFor] = useState<Deal | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -166,7 +204,7 @@ export default function DealsManagementPage() {
         d.id === deal.id ? { ...d, history: nextHistory, status: nextStatus } : d,
       ),
     );
-    setEditing(null);
+    setUpdatingVersion(null);
     setToast(
       nextStatus === 'scheduled'
         ? `Nova condição agendada para ${formatDate(version.start_date)}.`
@@ -176,6 +214,21 @@ export default function DealsManagementPage() {
       .from('admin_deals')
       .update({ history: nextHistory, status: nextStatus })
       .eq('id', deal.id);
+  };
+
+  const handleEditBase = async (
+    deal: Deal,
+    patch: {
+      name: string;
+      house: string;
+      target: string;
+      parent_deal_id: string | null;
+    },
+  ) => {
+    setDeals((list) => list.map((d) => (d.id === deal.id ? { ...d, ...patch } : d)));
+    setEditingBase(null);
+    setToast('Acordo atualizado com sucesso.');
+    await supabase.from('admin_deals').update(patch).eq('id', deal.id);
   };
 
   const handleCreateDeal = async (payload: {
@@ -231,7 +284,7 @@ export default function DealsManagementPage() {
             Super Admin · Gestão de Acordos
           </span>
           <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            Versionamento de Deals & Spread
+            Versionamento de Deals
           </h2>
           <p className="text-sm text-gray-500 dark:text-slate-400">
             Acompanhe a hierarquia de acordos, margens de repasse e evolução temporal de cada condição.
@@ -310,12 +363,6 @@ export default function DealsManagementPage() {
                 <th className="px-3 py-3 text-left font-semibold">Afiliado / Agência</th>
                 <th className="px-3 py-3 text-left font-semibold">Acordo Pai</th>
                 <th className="px-3 py-3 text-right font-semibold">Deal Atual</th>
-                <th className="px-3 py-3 text-right font-semibold">
-                  <span className="inline-flex items-center gap-1" title="Diferença entre o pai e o filho">
-                    Margem (Spread)
-                    <Info className="h-3 w-3 text-gray-400 dark:text-slate-500" />
-                  </span>
-                </th>
                 <th className="px-3 py-3 text-center font-semibold">Status</th>
                 <th className="px-5 py-3 text-right font-semibold">Ações</th>
               </tr>
@@ -323,7 +370,7 @@ export default function DealsManagementPage() {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
+                  <td colSpan={6} className="px-5 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
                     Nenhum acordo encontrado para os filtros atuais.
                   </td>
                 </tr>
@@ -331,7 +378,6 @@ export default function DealsManagementPage() {
               {filtered.map((d) => {
                 const current = currentVersion(d.history);
                 const parent = d.parent_deal_id ? dealsById[d.parent_deal_id] : null;
-                const parentCurrent = parent ? currentVersion(parent.history) : null;
                 const isOpen = !!expanded[d.id];
                 return (
                   <Fragment key={d.id}>
@@ -388,22 +434,28 @@ export default function DealsManagementPage() {
                           <span className="text-xs text-gray-500 dark:text-slate-500">—</span>
                         )}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-right">
-                        <SpreadBadge parent={parentCurrent} child={current} />
-                      </td>
                       <td className="whitespace-nowrap px-3 py-4 text-center">
                         <StatusBadge status={d.status} />
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <IconButton
-                            title="Atualizar Acordo"
+                            title="Editar Acordo"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setEditing(d);
+                              setEditingBase(d);
                             }}
                           >
                             <Pencil className="h-3.5 w-3.5" />
+                          </IconButton>
+                          <IconButton
+                            title="Nova Versão (agendar/aplicar)"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUpdatingVersion(d);
+                            }}
+                          >
+                            <CalendarClock className="h-3.5 w-3.5" />
                           </IconButton>
                           <IconButton
                             title="Ver Histórico"
@@ -418,7 +470,7 @@ export default function DealsManagementPage() {
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={7} className="p-0">
+                      <td colSpan={6} className="p-0">
                         <div
                           className={`grid overflow-hidden transition-all duration-500 ease-out ${
                             isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
@@ -440,11 +492,20 @@ export default function DealsManagementPage() {
         </div>
       </div>
 
-      {editing && (
+      {updatingVersion && (
         <UpdateDealModal
-          deal={editing}
-          onClose={() => setEditing(null)}
-          onApply={(v) => handleAppendVersion(editing, v)}
+          deal={updatingVersion}
+          onClose={() => setUpdatingVersion(null)}
+          onApply={(v) => handleAppendVersion(updatingVersion, v)}
+        />
+      )}
+
+      {editingBase && (
+        <EditBaseDealModal
+          deal={editingBase}
+          parents={deals.filter((d) => !d.parent_deal_id && d.id !== editingBase.id)}
+          onClose={() => setEditingBase(null)}
+          onSave={(patch) => handleEditBase(editingBase, patch)}
         />
       )}
 
@@ -517,48 +578,6 @@ function HouseAvatar({ house }: { house: string }) {
   return (
     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white ring-1 ring-white/10">
       {house.slice(0, 2).toUpperCase()}
-    </div>
-  );
-}
-
-function SpreadBadge({
-  parent,
-  child,
-}: {
-  parent: DealVersion | null;
-  child: DealVersion | null;
-}) {
-  if (!parent || !child) {
-    return <span className="text-xs text-gray-400 dark:text-slate-500">—</span>;
-  }
-  const cpaSpread = parent.cpa - child.cpa;
-  const revSpread = parent.rev - child.rev;
-  const positive = cpaSpread + revSpread > 0;
-  return (
-    <div
-      className={`inline-flex flex-col items-end rounded-lg px-2.5 py-1.5 ring-1 ${
-        positive
-          ? 'bg-neon-400/10 ring-neon-400/30'
-          : 'bg-rose-400/10 ring-rose-400/30'
-      }`}
-      title={`Margem em cima do acordo pai (CPA: ${formatBRL(parent.cpa)} · Rev: ${parent.rev}%)`}
-    >
-      <span
-        className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider ${
-          positive ? 'text-neon-700 dark:text-neon-300' : 'text-rose-600 dark:text-rose-300'
-        }`}
-      >
-        {positive ? (
-          <TrendingUp className="h-3 w-3" />
-        ) : (
-          <TrendingDown className="h-3 w-3" />
-        )}
-        {positive ? 'Lucro' : 'Prejuízo'}: {formatBRL(Math.abs(cpaSpread))}/CPA
-      </span>
-      <span className="text-[10px] tabular-nums text-gray-600 dark:text-slate-400">
-        {revSpread >= 0 ? '+' : ''}
-        {revSpread}% Rev
-      </span>
     </div>
   );
 }
@@ -734,7 +753,7 @@ function UpdateDealModal({
               min="0"
               value={cpa}
               onChange={(e) => setCpa(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
             />
           </Field>
           <Field label="Novo RevShare (%)">
@@ -745,12 +764,12 @@ function UpdateDealModal({
               max="100"
               value={rev}
               onChange={(e) => setRev(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
             />
           </Field>
         </div>
         <Field label="Data de Início">
-          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 focus-within:border-neon-400/50 focus-within:ring-2 focus-within:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70">
+          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 focus-within:border-neon-400/50 focus-within:ring-2 focus-within:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212]">
             <Calendar className="h-4 w-4 text-gray-400 dark:text-slate-500" />
             <input
               type="date"
@@ -802,6 +821,166 @@ function HistoryModal({ deal, onClose }: { deal: Deal; onClose: () => void }) {
   );
 }
 
+function HouseSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={SELECT_CLASS}
+    >
+      {Object.keys(HOUSE_META).map((h) => (
+        <option key={h} value={h} className={SELECT_OPTION_CLASS}>
+          {HOUSE_META[h].label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function TargetSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={SELECT_CLASS}
+    >
+      <option value="" className={SELECT_OPTION_CLASS}>
+        Selecione um afiliado ou agência...
+      </option>
+      {TARGET_OPTIONS.map((group) => (
+        <optgroup key={group.group} label={group.group}>
+          {group.items.map((item) => (
+            <option key={item} value={item} className={SELECT_OPTION_CLASS}>
+              {item}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
+function ParentSelect({
+  value,
+  onChange,
+  parents,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  parents: Deal[];
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={SELECT_CLASS}
+    >
+      <option value="" className={SELECT_OPTION_CLASS}>
+        Nenhum (acordo raiz)
+      </option>
+      {parents.map((p) => (
+        <option key={p.id} value={p.id} className={SELECT_OPTION_CLASS}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function EditBaseDealModal({
+  deal,
+  parents,
+  onClose,
+  onSave,
+}: {
+  deal: Deal;
+  parents: Deal[];
+  onClose: () => void;
+  onSave: (patch: {
+    name: string;
+    house: string;
+    target: string;
+    parent_deal_id: string | null;
+  }) => void;
+}) {
+  const [name, setName] = useState(deal.name);
+  const [house, setHouse] = useState(deal.house);
+  const [target, setTarget] = useState(deal.target);
+  const [parentId, setParentId] = useState<string>(deal.parent_deal_id ?? '');
+  const disabled = !name.trim() || !target.trim() || !house;
+
+  return (
+    <Modal
+      onClose={onClose}
+      title="Editar Acordo"
+      subtitle="Ajuste as informações base do acordo. Versões e histórico não são alterados aqui."
+      icon={<Pencil className="h-4 w-4" />}
+      wide
+    >
+      <div className="space-y-4">
+        <Field label="Nome do Acordo">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex: Acordo Global BetMGM"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Casa">
+            <HouseSelect value={house} onChange={setHouse} />
+          </Field>
+          <Field label="Afiliado / Agência">
+            <TargetSelect value={target} onChange={setTarget} />
+          </Field>
+        </div>
+        <Field label="Acordo Pai (opcional)">
+          <ParentSelect value={parentId} onChange={setParentId} parents={parents} />
+        </Field>
+        <p className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
+          <AlertCircle className="h-3 w-3" />
+          Para alterar CPA / RevShare, use "Nova Versão" — as condições anteriores ficam preservadas no histórico.
+        </p>
+      </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button
+          onClick={onClose}
+          className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:text-white"
+        >
+          Cancelar
+        </button>
+        <button
+          disabled={disabled}
+          onClick={() =>
+            onSave({
+              name: name.trim(),
+              house,
+              target,
+              parent_deal_id: parentId || null,
+            })
+          }
+          className="inline-flex items-center gap-2 rounded-xl bg-[#39FF14] px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-950 shadow-[0_0_18px_rgba(57,255,20,0.35)] transition hover:bg-neon-300 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        >
+          <Check className="h-4 w-4" />
+          Salvar alterações
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 function NewDealModal({
   parents,
   onClose,
@@ -849,56 +1028,20 @@ function NewDealModal({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: VIP Tubarões - BetFair"
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            placeholder="Ex: Acordo Global BetMGM"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Casa">
-            <select
-              value={house}
-              onChange={(e) => setHouse(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
-            >
-              {Object.keys(HOUSE_META).map((h) => (
-                <option
-                  key={h}
-                  value={h}
-                  className="bg-white text-gray-800 dark:bg-[#1E1E24] dark:text-slate-200"
-                >
-                  {HOUSE_META[h].label}
-                </option>
-              ))}
-            </select>
+            <HouseSelect value={house} onChange={setHouse} />
           </Field>
           <Field label="Afiliado / Agência">
-            <input
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-              placeholder="Ex: Rodrigo Alves"
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
-            />
+            <TargetSelect value={target} onChange={setTarget} />
           </Field>
         </div>
         <Field label="Acordo Pai (opcional)">
-          <select
-            value={parentId}
-            onChange={(e) => setParentId(e.target.value)}
-            className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
-          >
-            <option value="" className="bg-white text-gray-800 dark:bg-[#1E1E24] dark:text-slate-200">
-              Nenhum (acordo raiz)
-            </option>
-            {parents.map((p) => (
-              <option
-                key={p.id}
-                value={p.id}
-                className="bg-white text-gray-800 dark:bg-[#1E1E24] dark:text-slate-200"
-              >
-                {p.name}
-              </option>
-            ))}
-          </select>
+          <ParentSelect value={parentId} onChange={setParentId} parents={parents} />
         </Field>
         <div className="grid grid-cols-3 gap-3">
           <Field label="CPA (R$)">
@@ -907,7 +1050,7 @@ function NewDealModal({
               step="0.01"
               value={cpa}
               onChange={(e) => setCpa(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
             />
           </Field>
           <Field label="RevShare (%)">
@@ -916,7 +1059,7 @@ function NewDealModal({
               step="1"
               value={rev}
               onChange={(e) => setRev(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
             />
           </Field>
           <Field label="Início">
@@ -924,7 +1067,7 @@ function NewDealModal({
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
             />
           </Field>
         </div>
