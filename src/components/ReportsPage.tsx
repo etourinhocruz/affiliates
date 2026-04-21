@@ -12,7 +12,8 @@ import {
   Coins,
   MousePointerClick,
   Search,
-  Percent,
+  LineChart,
+  Gem,
   Globe,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -26,6 +27,8 @@ type Campaign = {
   ftd: number;
   qftd: number;
   depositoTotal: number;
+  netRevenue: number;
+  revLiquido: number;
   commission: number;
 };
 
@@ -37,6 +40,8 @@ type ReportDay = {
   ftd: number;
   qftd: number;
   depositoTotal: number;
+  netRevenue: number;
+  revLiquido: number;
   totalCommission: number;
   campaigns: Campaign[];
 };
@@ -70,12 +75,12 @@ function buildMockReports(): ReportDay[] {
     { date: '2026-04-14', scale: 0.52 },
   ];
   const campaignTemplates = [
-    { houseName: 'SuperBet', campaignName: 'FB_Ads_Tubarões', clicks: 820, cadastros: 112, ftd: 48, qftd: 34, depositoTotal: 14200, commission: 4600 },
-    { houseName: 'SuperBet', campaignName: 'Google_Search_Brand', clicks: 410, cadastros: 52, ftd: 26, qftd: 18, depositoTotal: 7820, commission: 2420 },
-    { houseName: 'BetMGM', campaignName: 'Instagram_Bio', clicks: 360, cadastros: 58, ftd: 22, qftd: 16, depositoTotal: 6880, commission: 2180 },
-    { houseName: 'EsportivaBet', campaignName: 'Telegram_Free', clicks: 280, cadastros: 42, ftd: 14, qftd: 9, depositoTotal: 4120, commission: 1280 },
-    { houseName: 'NoviBet', campaignName: 'YouTube_Review', clicks: 220, cadastros: 36, ftd: 12, qftd: 8, depositoTotal: 3240, commission: 980 },
-    { houseName: 'BetFair', campaignName: 'Blog_SEO', clicks: 180, cadastros: 24, ftd: 8, qftd: 5, depositoTotal: 2280, commission: 720 },
+    { houseName: 'SuperBet', campaignName: 'FB_Ads_Tubarões', clicks: 820, cadastros: 112, ftd: 48, qftd: 34, depositoTotal: 14200, netRevenue: 5120, revLiquido: 3680, commission: 4600 },
+    { houseName: 'SuperBet', campaignName: 'Google_Search_Brand', clicks: 410, cadastros: 52, ftd: 26, qftd: 18, depositoTotal: 7820, netRevenue: 2840, revLiquido: 1920, commission: 2420 },
+    { houseName: 'BetMGM', campaignName: 'Instagram_Bio', clicks: 360, cadastros: 58, ftd: 22, qftd: 16, depositoTotal: 6880, netRevenue: 2410, revLiquido: 1680, commission: 2180 },
+    { houseName: 'EsportivaBet', campaignName: 'Telegram_Free', clicks: 280, cadastros: 42, ftd: 14, qftd: 9, depositoTotal: 4120, netRevenue: 1460, revLiquido: 980, commission: 1280 },
+    { houseName: 'NoviBet', campaignName: 'YouTube_Review', clicks: 220, cadastros: 36, ftd: 12, qftd: 8, depositoTotal: 3240, netRevenue: 1180, revLiquido: 760, commission: 980 },
+    { houseName: 'BetFair', campaignName: 'Blog_SEO', clicks: 180, cadastros: 24, ftd: 8, qftd: 5, depositoTotal: 2280, netRevenue: 820, revLiquido: 540, commission: 720 },
   ];
 
   return days.map((d) => {
@@ -87,6 +92,8 @@ function buildMockReports(): ReportDay[] {
       ftd: Math.round(t.ftd * d.scale),
       qftd: Math.round(t.qftd * d.scale),
       depositoTotal: Math.round(t.depositoTotal * d.scale),
+      netRevenue: Math.round(t.netRevenue * d.scale),
+      revLiquido: Math.round(t.revLiquido * d.scale),
       commission: Math.round(t.commission * d.scale),
     }));
     const totals = campaigns.reduce(
@@ -96,9 +103,11 @@ function buildMockReports(): ReportDay[] {
         ftd: acc.ftd + c.ftd,
         qftd: acc.qftd + c.qftd,
         depositoTotal: acc.depositoTotal + c.depositoTotal,
+        netRevenue: acc.netRevenue + c.netRevenue,
+        revLiquido: acc.revLiquido + c.revLiquido,
         totalCommission: acc.totalCommission + c.commission,
       }),
-      { totalClicks: 0, cadastros: 0, ftd: 0, qftd: 0, depositoTotal: 0, totalCommission: 0 },
+      { totalClicks: 0, cadastros: 0, ftd: 0, qftd: 0, depositoTotal: 0, netRevenue: 0, revLiquido: 0, totalCommission: 0 },
     );
     return { id: d.date, date: d.date, ...totals, campaigns };
   });
@@ -119,6 +128,10 @@ function formatBRL(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+function formatInt(value: number): string {
+  return value.toLocaleString('pt-BR');
 }
 
 function formatDate(iso: string): string {
@@ -168,26 +181,66 @@ export default function ReportsPage() {
             ftd: acc.ftd + c.ftd,
             qftd: acc.qftd + c.qftd,
             depositoTotal: acc.depositoTotal + c.depositoTotal,
+            netRevenue: acc.netRevenue + c.netRevenue,
+            revLiquido: acc.revLiquido + c.revLiquido,
             totalCommission: acc.totalCommission + c.commission,
           }),
-          { totalClicks: 0, cadastros: 0, ftd: 0, qftd: 0, depositoTotal: 0, totalCommission: 0 },
+          {
+            totalClicks: 0,
+            cadastros: 0,
+            ftd: 0,
+            qftd: 0,
+            depositoTotal: 0,
+            netRevenue: 0,
+            revLiquido: 0,
+            totalCommission: 0,
+          },
         );
         return { ...r, ...agg, campaigns: bySearch };
       })
       .filter((r) => r.campaigns.length > 0);
   }, [reports, selectedHouse, search]);
 
+  const grandTotals = useMemo(
+    () =>
+      filteredReports.reduce(
+        (acc, r) => ({
+          totalClicks: acc.totalClicks + r.totalClicks,
+          cadastros: acc.cadastros + r.cadastros,
+          ftd: acc.ftd + r.ftd,
+          qftd: acc.qftd + r.qftd,
+          depositoTotal: acc.depositoTotal + r.depositoTotal,
+          netRevenue: acc.netRevenue + r.netRevenue,
+          revLiquido: acc.revLiquido + r.revLiquido,
+          totalCommission: acc.totalCommission + r.totalCommission,
+        }),
+        {
+          totalClicks: 0,
+          cadastros: 0,
+          ftd: 0,
+          qftd: 0,
+          depositoTotal: 0,
+          netRevenue: 0,
+          revLiquido: 0,
+          totalCommission: 0,
+        },
+      ),
+    [filteredReports],
+  );
+
   const exportCSV = () => {
     const header = [
       'Data',
       'Casa',
       'Campanha',
-      'Cliques',
+      'Clicks',
       'Cadastros',
       'FTD',
       'QFTD',
       'Deposito',
-      'Comissao',
+      'NetRevenue',
+      'RevLiquido',
+      'ComissaoTotal',
     ];
     const rows: string[][] = [];
     filteredReports.forEach((day) => {
@@ -201,10 +254,25 @@ export default function ReportsPage() {
           String(c.ftd),
           String(c.qftd),
           c.depositoTotal.toFixed(2),
+          c.netRevenue.toFixed(2),
+          c.revLiquido.toFixed(2),
           c.commission.toFixed(2),
         ]);
       });
     });
+    rows.push([
+      'TOTAL',
+      '',
+      '',
+      String(grandTotals.totalClicks),
+      String(grandTotals.cadastros),
+      String(grandTotals.ftd),
+      String(grandTotals.qftd),
+      grandTotals.depositoTotal.toFixed(2),
+      grandTotals.netRevenue.toFixed(2),
+      grandTotals.revLiquido.toFixed(2),
+      grandTotals.totalCommission.toFixed(2),
+    ]);
     const csv = [header, ...rows].map((r) => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -319,33 +387,30 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1080px] text-sm">
+          <table className="w-full min-w-[1200px] text-sm">
             <thead>
-              <tr className="bg-gray-50 text-left text-[11px] uppercase tracking-wider text-gray-500 dark:bg-black/30 dark:text-slate-400">
-                <Th icon={<CalendarDays className="h-3.5 w-3.5" />}>Data</Th>
-                <Th icon={<MousePointerClick className="h-3.5 w-3.5" />}>Cliques</Th>
-                <Th icon={<Users className="h-3.5 w-3.5" />}>Cadastros</Th>
-                <Th icon={<Flame className="h-3.5 w-3.5" />}>FTD</Th>
-                <Th icon={<Trophy className="h-3.5 w-3.5" />}>QFTD</Th>
-                <Th icon={<Percent className="h-3.5 w-3.5" />}>Conv. Click→FTD</Th>
-                <Th icon={<Wallet className="h-3.5 w-3.5" />}>Depósitos</Th>
-                <Th icon={<Coins className="h-3.5 w-3.5" />} align="right">
-                  Comissão
-                </Th>
+              <tr className="bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500 dark:bg-black/30 dark:text-slate-400">
+                <Th align="left" icon={<CalendarDays className="h-3.5 w-3.5" />}>Data</Th>
+                <Th align="center" icon={<MousePointerClick className="h-3.5 w-3.5" />}>Clicks</Th>
+                <Th align="center" icon={<Users className="h-3.5 w-3.5" />}>Cadastros</Th>
+                <Th align="center" icon={<Flame className="h-3.5 w-3.5" />}>FTD</Th>
+                <Th align="center" icon={<Trophy className="h-3.5 w-3.5" />}>QFTD</Th>
+                <Th align="right" icon={<Wallet className="h-3.5 w-3.5" />}>Depósito</Th>
+                <Th align="right" icon={<LineChart className="h-3.5 w-3.5" />}>Net Revenue</Th>
+                <Th align="right" icon={<Gem className="h-3.5 w-3.5" />}>Rev Líquido</Th>
+                <Th align="right" icon={<Coins className="h-3.5 w-3.5" />}>Comissão Total</Th>
               </tr>
             </thead>
             <tbody>
               {filteredReports.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
+                  <td colSpan={9} className="px-5 py-10 text-center text-sm text-gray-500 dark:text-slate-400">
                     Nenhum resultado encontrado para os filtros selecionados.
                   </td>
                 </tr>
               )}
               {filteredReports.map((day) => {
                 const isOpen = !!expanded[day.id];
-                const convClickFtd =
-                  day.totalClicks > 0 ? (day.ftd / day.totalClicks) * 100 : 0;
                 return (
                   <Fragment key={day.id}>
                     <tr
@@ -354,7 +419,7 @@ export default function ReportsPage() {
                       }
                       className="cursor-pointer border-b border-gray-100 text-gray-700 transition hover:bg-gray-50 dark:border-white/5 dark:text-slate-200 dark:hover:bg-white/5"
                     >
-                      <td className="px-5 py-4">
+                      <td className="whitespace-nowrap px-5 py-4 text-left">
                         <div className="flex items-center gap-2">
                           <ChevronRight
                             className={`h-4 w-4 text-gray-400 transition-transform dark:text-slate-500 ${
@@ -366,30 +431,37 @@ export default function ReportsPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-3 py-4 tabular-nums">
-                        {day.totalClicks.toLocaleString('pt-BR')}
+                      <td className="whitespace-nowrap px-3 py-4 text-center tabular-nums">
+                        {formatInt(day.totalClicks)}
                       </td>
-                      <td className="px-3 py-4 tabular-nums">
-                        {day.cadastros.toLocaleString('pt-BR')}
+                      <td className="whitespace-nowrap px-3 py-4 text-center tabular-nums">
+                        {formatInt(day.cadastros)}
                       </td>
-                      <td className="px-3 py-4 tabular-nums">{day.ftd}</td>
-                      <td className="px-3 py-4 tabular-nums">{day.qftd}</td>
-                      <td className="px-3 py-4">
-                        <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 dark:bg-sky-400/10 dark:text-sky-300 dark:ring-sky-400/20">
-                          {convClickFtd.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="px-3 py-4 tabular-nums text-gray-700 dark:text-slate-200">
+                      <td className="whitespace-nowrap px-3 py-4 text-center tabular-nums">{day.ftd}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-center tabular-nums">{day.qftd}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-right tabular-nums text-gray-700 dark:text-slate-200">
                         {formatBRL(day.depositoTotal)}
                       </td>
-                      <td className="px-5 py-4 text-right tabular-nums">
+                      <td
+                        className={`whitespace-nowrap px-3 py-4 text-right tabular-nums font-medium ${
+                          day.netRevenue < 0
+                            ? 'text-rose-500 dark:text-rose-400'
+                            : 'text-emerald-600 dark:text-emerald-300/90'
+                        }`}
+                      >
+                        {formatBRL(day.netRevenue)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-right tabular-nums text-gray-800 dark:text-slate-100">
+                        {formatBRL(day.revLiquido)}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right tabular-nums">
                         <span className="font-bold text-neon-600 dark:text-neon-300 dark:drop-shadow-[0_0_6px_rgba(57,255,20,0.25)]">
                           {formatBRL(day.totalCommission)}
                         </span>
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={8} className="p-0">
+                      <td colSpan={9} className="p-0">
                         <div
                           className={`grid overflow-hidden transition-all duration-500 ease-out ${
                             isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
@@ -397,19 +469,19 @@ export default function ReportsPage() {
                         >
                           <div className="min-h-0">
                             <div className="border-b border-gray-100 bg-gray-50/70 px-5 py-4 dark:border-white/5 dark:bg-black/30">
-                              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-[#14141A]">
-                                <table className="w-full min-w-[880px] text-xs">
+                              <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-[#14141A]">
+                                <table className="w-full min-w-[1080px] text-xs">
                                   <thead>
-                                    <tr className="bg-gray-100 text-left text-[10px] uppercase tracking-wider text-gray-500 dark:bg-black/40 dark:text-slate-500">
-                                      <th className="px-4 py-2.5 font-semibold">Campanha</th>
-                                      <th className="px-3 py-2.5 font-semibold">Cliques</th>
-                                      <th className="px-3 py-2.5 font-semibold">Cadastros</th>
-                                      <th className="px-3 py-2.5 font-semibold">FTDs</th>
-                                      <th className="px-3 py-2.5 font-semibold">QFTDs</th>
-                                      <th className="px-3 py-2.5 font-semibold">Depósitos</th>
-                                      <th className="px-4 py-2.5 text-right font-semibold">
-                                        Comissão
-                                      </th>
+                                    <tr className="bg-gray-100 text-[10px] uppercase tracking-wider text-gray-500 dark:bg-black/40 dark:text-slate-500">
+                                      <th className="px-4 py-2.5 text-left font-semibold">Campanha</th>
+                                      <th className="px-3 py-2.5 text-center font-semibold">Clicks</th>
+                                      <th className="px-3 py-2.5 text-center font-semibold">Cadastros</th>
+                                      <th className="px-3 py-2.5 text-center font-semibold">FTD</th>
+                                      <th className="px-3 py-2.5 text-center font-semibold">QFTD</th>
+                                      <th className="px-3 py-2.5 text-right font-semibold">Depósito</th>
+                                      <th className="px-3 py-2.5 text-right font-semibold">Net Rev</th>
+                                      <th className="px-3 py-2.5 text-right font-semibold">Rev Líquido</th>
+                                      <th className="px-4 py-2.5 text-right font-semibold">Comissão</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -418,7 +490,7 @@ export default function ReportsPage() {
                                         key={`${day.id}-${idx}`}
                                         className="border-t border-gray-100 text-gray-700 dark:border-white/5 dark:text-slate-300"
                                       >
-                                        <td className="px-4 py-2.5">
+                                        <td className="whitespace-nowrap px-4 py-2.5 text-left">
                                           <div className="flex items-center gap-2">
                                             <ChevronRight className="h-3.5 w-3.5 text-gray-400 dark:text-slate-500" />
                                             <div className="flex flex-col">
@@ -431,18 +503,30 @@ export default function ReportsPage() {
                                             </div>
                                           </div>
                                         </td>
-                                        <td className="px-3 py-2.5 tabular-nums">
-                                          {c.clicks.toLocaleString('pt-BR')}
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-center tabular-nums">
+                                          {formatInt(c.clicks)}
                                         </td>
-                                        <td className="px-3 py-2.5 tabular-nums">
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-center tabular-nums">
                                           {c.cadastros}
                                         </td>
-                                        <td className="px-3 py-2.5 tabular-nums">{c.ftd}</td>
-                                        <td className="px-3 py-2.5 tabular-nums">{c.qftd}</td>
-                                        <td className="px-3 py-2.5 tabular-nums">
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-center tabular-nums">{c.ftd}</td>
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-center tabular-nums">{c.qftd}</td>
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
                                           {formatBRL(c.depositoTotal)}
                                         </td>
-                                        <td className="px-4 py-2.5 text-right tabular-nums font-bold text-neon-600 dark:text-neon-300">
+                                        <td
+                                          className={`whitespace-nowrap px-3 py-2.5 text-right tabular-nums ${
+                                            c.netRevenue < 0
+                                              ? 'text-rose-500 dark:text-rose-400'
+                                              : 'text-emerald-600 dark:text-emerald-300/80'
+                                          }`}
+                                        >
+                                          {formatBRL(c.netRevenue)}
+                                        </td>
+                                        <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-gray-800 dark:text-slate-100">
+                                          {formatBRL(c.revLiquido)}
+                                        </td>
+                                        <td className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums font-bold text-neon-600 dark:text-neon-300">
                                           {formatBRL(c.commission)}
                                         </td>
                                       </tr>
@@ -459,6 +543,49 @@ export default function ReportsPage() {
                 );
               })}
             </tbody>
+            {filteredReports.length > 0 && (
+              <tfoot>
+                <tr className="border-t-2 border-gray-300 bg-gray-100 text-gray-900 dark:border-gray-700 dark:bg-[#121212] dark:text-white">
+                  <td className="whitespace-nowrap px-5 py-4 text-left">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-900 dark:text-white">
+                      Total da Operação
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-center font-bold tabular-nums">
+                    {formatInt(grandTotals.totalClicks)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-center font-bold tabular-nums">
+                    {formatInt(grandTotals.cadastros)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-center font-bold tabular-nums">
+                    {formatInt(grandTotals.ftd)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-center font-bold tabular-nums">
+                    {formatInt(grandTotals.qftd)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-right font-bold tabular-nums">
+                    {formatBRL(grandTotals.depositoTotal)}
+                  </td>
+                  <td
+                    className={`whitespace-nowrap px-3 py-4 text-right font-bold tabular-nums ${
+                      grandTotals.netRevenue < 0
+                        ? 'text-rose-500 dark:text-rose-400'
+                        : 'text-emerald-700 dark:text-emerald-300'
+                    }`}
+                  >
+                    {formatBRL(grandTotals.netRevenue)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-right font-bold tabular-nums">
+                    {formatBRL(grandTotals.revLiquido)}
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4 text-right tabular-nums">
+                    <span className="text-base font-extrabold text-[#39FF14] drop-shadow-[0_0_10px_rgba(57,255,20,0.45)]">
+                      {formatBRL(grandTotals.totalCommission)}
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
@@ -473,19 +600,17 @@ function Th({
 }: {
   children: React.ReactNode;
   icon?: React.ReactNode;
-  align?: 'left' | 'right';
+  align?: 'left' | 'center' | 'right';
 }) {
+  const alignCls =
+    align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left';
+  const justifyCls =
+    align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start';
   return (
     <th
-      className={`px-3 py-3 font-semibold first:px-5 last:px-5 ${
-        align === 'right' ? 'text-right' : ''
-      }`}
+      className={`whitespace-nowrap px-3 py-3 font-semibold first:px-5 last:px-5 ${alignCls}`}
     >
-      <span
-        className={`inline-flex items-center gap-1.5 ${
-          align === 'right' ? 'justify-end' : ''
-        }`}
-      >
+      <span className={`inline-flex items-center gap-1.5 ${justifyCls}`}>
         {icon}
         {children}
       </span>
