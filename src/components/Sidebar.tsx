@@ -8,7 +8,7 @@ import {
   Trophy,
   Users,
   Shield,
-  ShieldCheck,
+  Building2,
   UserCog,
   FileClock,
   Cog,
@@ -36,7 +36,7 @@ const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   SUPER_ADMIN: [
     { key: 'admin-dashboard', label: 'Dashboard Admin', icon: Shield },
     { key: 'admin-users', label: 'Gestão de Usuários', icon: UserCog },
-    { key: 'admin-withdrawals', label: 'Aprovação de Saques', icon: ShieldCheck },
+    { key: 'admin-agencies', label: 'Gestão de Agências', icon: Building2 },
     { key: 'admin-audit', label: 'Auditoria', icon: FileClock },
     { key: 'admin-settings', label: 'Configurações Globais', icon: Cog },
   ],

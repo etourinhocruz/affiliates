@@ -13,7 +13,6 @@ import {
   Network,
   PieChart,
   Settings as SettingsIcon,
-  ShieldCheck,
   Sparkles,
   Trophy,
   UserPlus,
@@ -34,6 +33,7 @@ import AnimatedNumber from './components/AnimatedNumber';
 import PlaceholderPage from './components/PlaceholderPage';
 import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
 import UsersManagementPage from './components/admin/UsersManagementPage';
+import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
@@ -367,15 +367,8 @@ function App() {
         return <SuperAdminDashboard />;
       case 'admin-users':
         return <UsersManagementPage />;
-      case 'admin-withdrawals':
-        return (
-          <PlaceholderPage
-            roleLabel="Super Admin · Financeiro"
-            title="Aprovação de Saques"
-            subtitle="Fila de saques pendentes para revisão e liberação."
-            icon={ShieldCheck}
-          />
-        );
+      case 'admin-agencies':
+        return <AgenciesManagementPage />;
       case 'admin-audit':
         return (
           <PlaceholderPage
