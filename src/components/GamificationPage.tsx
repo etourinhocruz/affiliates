@@ -14,7 +14,7 @@ const mockPrizes: Prize[] = [
     title: 'Apple Watch SE3',
     subtitle: 'Smartwatch Apple',
     qftdTarget: 500,
-    image: 'https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: '/Captura_de_Tela_2026-04-20_às_23.55.20.png',
   },
   {
     id: 'ipad-11',
