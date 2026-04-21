@@ -10,72 +10,65 @@ type Prize = {
 
 const mockPrizes: Prize[] = [
   {
-    id: 'apple-watch',
-    title: 'Apple Watch',
-    subtitle: 'Series 10 GPS 46mm',
-    qftdTarget: 100,
+    id: 'apple-watch-se3',
+    title: 'Apple Watch SE3',
+    subtitle: 'Smartwatch Apple',
+    qftdTarget: 500,
     image: 'https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
   {
     id: 'ipad-11',
     title: 'iPad 11',
-    subtitle: 'Wi-Fi 128GB Space Gray',
-    qftdTarget: 250,
+    subtitle: 'Tablet Apple',
+    qftdTarget: 800,
     image: 'https://images.pexels.com/photos/1334597/pexels-photo-1334597.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
   {
     id: 'kit-apple',
     title: 'Kit Apple',
-    subtitle: 'Macbook + AirPods + iPhone 17 Pro Max',
-    qftdTarget: 500,
+    subtitle: 'iPhone 17 Pro Max + Macbook + AirPods',
+    qftdTarget: 2000,
     image: 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
   {
-    id: 'camarote-vip',
-    title: 'Camarotes VIP',
-    subtitle: 'Em grandes estádios pelo Brasil',
-    qftdTarget: 800,
-    image: 'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=600',
-  },
-  {
     id: 'cancun',
-    title: 'Resort All Inclusive Cancún',
-    subtitle: 'Pacote completo + acompanhante',
-    qftdTarget: 1500,
+    title: 'Viagem Cancún All Inclusive',
+    subtitle: '4 Noites + Acompanhante',
+    qftdTarget: 4000,
     image: 'https://images.pexels.com/photos/1island/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600',
   },
   {
+    id: 'final-champions',
+    title: 'Passaporte Final Champions League',
+    subtitle: 'Hotel 5 estrelas, passagem Premium Economy, ingresso + 2 camisas oficiais dos finalistas',
+    qftdTarget: 7000,
+    image: 'https://images.pexels.com/photos/140066/pexels-photo-140066.jpeg?auto=compress&cs=tinysrgb&w=600',
+  },
+  {
     id: 'cash-100k',
-    title: 'R$ 100.000,00',
-    subtitle: 'Em dinheiro na sua conta',
-    qftdTarget: 3000,
+    title: 'R$ 100.000,00 no PIX',
+    subtitle: 'Direto na sua conta',
+    qftdTarget: 10000,
     image: 'https://images.pexels.com/photos/164527/pexels-photo-164527.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
   {
     id: 'copa-mundo',
     title: 'Passaporte Copa do Mundo',
-    subtitle: 'Experiência completa in loco',
-    qftdTarget: 5000,
+    subtitle: 'Hotel 4 estrelas, passagem Premium Economy, ingresso para os 3 jogos do Brasil (fase de grupos) + camisa oficial do Brasil',
+    qftdTarget: 15000,
     image: 'https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
   {
-    id: 'final-champions',
-    title: 'Final Champions League',
-    subtitle: 'Passaporte VIP para a decisão',
-    qftdTarget: 7000,
-    image: 'https://images.pexels.com/photos/140066/pexels-photo-140066.jpeg?auto=compress&cs=tinysrgb&w=600',
-  },
-  {
     id: 'bmw-320i',
-    title: 'BMW 320i',
-    subtitle: '2026 0KM Zero Quilômetro',
-    qftdTarget: 10000,
+    title: 'BMW 320i 0KM 2026',
+    subtitle: 'O carro dos seus sonhos',
+    qftdTarget: 25000,
     image: 'https://images.pexels.com/photos/385998/pexels-photo-385998.jpeg?auto=compress&cs=tinysrgb&w=600',
   },
 ];
 
 export default function GamificationPage() {
-  const currentQFTDs = 450;
+  const currentQFTDs = 2450;
 
   const unlockedCount = mockPrizes.filter((p) => currentQFTDs >= p.qftdTarget).length;
   const nextPrize = mockPrizes.find((p) => currentQFTDs < p.qftdTarget);
