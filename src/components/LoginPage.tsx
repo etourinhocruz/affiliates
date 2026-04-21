@@ -6,22 +6,33 @@ type Props = {
 };
 
 export default function LoginPage({ onSuccess }: Props) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const VALID_EMAIL = 'pierre@affiliates.com';
+  const VALID_PASSWORD = 'Pierre@2026';
+
+  const [email, setEmail] = useState(VALID_EMAIL);
+  const [password, setPassword] = useState(VALID_PASSWORD);
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    setError(null);
+
+    if (email.trim() !== VALID_EMAIL || password !== VALID_PASSWORD) {
+      setError('Credenciais inválidas. Tente novamente.');
+      return;
+    }
+
     setLoading(true);
     window.setTimeout(() => {
       if (remember) localStorage.setItem('amg.session', '1');
       else sessionStorage.setItem('amg.session', '1');
       setLoading(false);
       onSuccess();
-    }, 1000);
+    }, 1500);
   };
 
   return (
@@ -62,10 +73,13 @@ export default function LoginPage({ onSuccess }: Props) {
         <div className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[#39FF14]/10 blur-[140px]" />
         <div className="absolute -bottom-40 right-0 h-[24rem] w-[24rem] rounded-full bg-emerald-600/10 blur-[140px]" />
 
-        <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
+        <div className="relative z-10 flex w-full flex-col justify-between p-14 xl:pl-20 xl:pr-16 xl:py-20">
           {/* Logo */}
-          <div className="flex items-center gap-3 animate-hero" style={{ animationDelay: '0ms' }}>
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-[#39FF14]/40 shadow-[0_0_22px_rgba(57,255,20,0.35)]">
+          <div
+            className="flex items-center gap-4 animate-hero"
+            style={{ animationDelay: '0ms' }}
+          >
+            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-black p-2 ring-1 ring-[#39FF14]/40 shadow-[0_0_28px_rgba(57,255,20,0.4)]">
               <img
                 src="/AFFILIATES_LOGO_PNG_(2).png"
                 alt="Mansão Green Affiliates"
@@ -73,13 +87,13 @@ export default function LoginPage({ onSuccess }: Props) {
               />
             </div>
             <div className="leading-tight">
-              <p className="text-[17px] font-bold tracking-tight text-white">
+              <p className="text-2xl font-bold tracking-tight text-white">
                 Mansão{' '}
-                <span className="text-[#39FF14] drop-shadow-[0_0_6px_rgba(57,255,20,0.55)]">
+                <span className="text-[#39FF14] drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">
                   Green
                 </span>
               </p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400">
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.38em] text-slate-400">
                 Affiliates
               </p>
             </div>
@@ -95,15 +109,18 @@ export default function LoginPage({ onSuccess }: Props) {
             </span>
 
             <h1
-              className="mt-8 text-[64px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[84px]"
+              className="mt-8 text-[60px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[78px]"
               style={{ animationDelay: '220ms' }}
             >
               <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                A Elite do
+                O Seu
+              </span>{' '}
+              <span className="relative inline-block bg-gradient-to-r from-[#7CFF58] via-[#39FF14] to-emerald-400 bg-clip-text pr-1 text-transparent drop-shadow-[0_0_30px_rgba(57,255,20,0.45)]">
+                Império
               </span>
               <br />
-              <span className="relative inline-block bg-gradient-to-r from-[#7CFF58] via-[#39FF14] to-emerald-400 bg-clip-text pr-1 text-transparent drop-shadow-[0_0_30px_rgba(57,255,20,0.35)]">
-                iGaming.
+              <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                no iGaming.
               </span>
             </h1>
 
@@ -117,7 +134,7 @@ export default function LoginPage({ onSuccess }: Props) {
 
             {/* Floating glass card with minimal growth chart */}
             <div
-              className="relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-hero"
+              className="group relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-hero transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02] hover:border-[#39FF14]/25 hover:shadow-[0_40px_90px_-30px_rgba(0,0,0,0.95),0_0_40px_rgba(57,255,20,0.12)]"
               style={{ animationDelay: '460ms' }}
             >
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(57,255,20,0.12),transparent_55%)]" />
@@ -198,7 +215,7 @@ export default function LoginPage({ onSuccess }: Props) {
           <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.03] blur-2xl" />
           <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_50px_rgba(57,255,20,0.05)]" />
 
-          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_50px_rgba(57,255,20,0.05)] backdrop-blur-2xl sm:p-10">
+          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_50px_rgba(57,255,20,0.05)] backdrop-blur-2xl transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_80px_rgba(57,255,20,0.12)] sm:p-10">
             {/* top inner highlight */}
             <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
@@ -214,7 +231,7 @@ export default function LoginPage({ onSuccess }: Props) {
 
             <div className="mb-8">
               <h2 className="text-3xl font-bold tracking-tight text-white">
-                Bem-vindo de volta
+                Bem-vindo
               </h2>
               <p className="mt-2 text-sm text-slate-400">
                 Insira suas credenciais para acessar sua conta.
@@ -227,7 +244,10 @@ export default function LoginPage({ onSuccess }: Props) {
                 label="E-mail"
                 type="email"
                 value={email}
-                onChange={setEmail}
+                onChange={(v) => {
+                  setEmail(v);
+                  if (error) setError(null);
+                }}
                 placeholder="voce@exemplo.com"
                 icon={<Mail className="h-4 w-4" />}
                 autoComplete="email"
@@ -257,7 +277,10 @@ export default function LoginPage({ onSuccess }: Props) {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
                     placeholder="••••••••"
                     autoComplete="current-password"
                     required
@@ -300,7 +323,7 @@ export default function LoginPage({ onSuccess }: Props) {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative mt-2 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#7CFF58]/40 bg-gradient-to-b from-[#7CFF58] via-[#39FF14] to-[#17B800] text-sm font-bold uppercase tracking-[0.22em] text-black shadow-[0_10px_30px_-8px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(57,255,20,0.4),0_18px_40px_-10px_rgba(57,255,20,0.55),inset_0_1px_0_rgba(255,255,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39FF14]/60 disabled:cursor-not-allowed disabled:opacity-85 disabled:hover:translate-y-0"
+                className="group relative mt-2 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#7CFF58]/40 bg-gradient-to-b from-[#7CFF58] via-[#39FF14] to-[#17B800] text-sm font-bold uppercase tracking-[0.22em] text-black shadow-[0_10px_30px_-8px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:animate-pulse-glow hover:shadow-[0_0_32px_rgba(57,255,20,0.6),0_18px_44px_-10px_rgba(57,255,20,0.65),inset_0_1px_0_rgba(255,255,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39FF14]/60 disabled:cursor-not-allowed disabled:opacity-85 disabled:hover:translate-y-0 disabled:hover:animate-none"
               >
                 <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.35),transparent_55%)]" />
                 <span
@@ -318,6 +341,15 @@ export default function LoginPage({ onSuccess }: Props) {
                   </span>
                 )}
               </button>
+
+              {error && (
+                <p
+                  role="alert"
+                  className="animate-fade-in text-center text-sm font-medium text-rose-400/90"
+                >
+                  {error}
+                </p>
+              )}
             </form>
 
             <p className="mt-8 text-center text-sm text-slate-400">
@@ -387,3 +419,6 @@ function Field({
     </div>
   );
 }
+
+
+export default LoginPage
