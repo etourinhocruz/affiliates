@@ -106,7 +106,7 @@ export default function GamificationPage() {
               <p className="mt-2 text-sm text-slate-300">
                 Seu saldo atual:{' '}
                 <span className="text-xl font-extrabold text-neon-300 drop-shadow-[0_0_10px_rgba(57,255,20,0.55)]">
-                  {currentQFTDs}
+                  {currentQFTDs.toLocaleString('pt-BR')}
                 </span>{' '}
                 QFTDs válidos.
               </p>
@@ -132,7 +132,7 @@ export default function GamificationPage() {
                 <p className="text-xs text-slate-400">
                   Faltam{' '}
                   <span className="font-bold text-neon-300">
-                    {nextPrize.qftdTarget - currentQFTDs}
+                    {(nextPrize.qftdTarget - currentQFTDs).toLocaleString('pt-BR')}
                   </span>{' '}
                   QFTDs
                 </p>
