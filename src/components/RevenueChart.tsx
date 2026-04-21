@@ -117,10 +117,10 @@ export default function RevenueChart({ data }: Props) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-white/[0.05] dark:via-white/[0.02] dark:to-white/[0.01] dark:shadow-none dark:backdrop-blur-xl sm:p-6"
+      className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-white/[0.05] dark:via-white/[0.02] dark:to-white/[0.01] dark:shadow-none dark:backdrop-blur-xl sm:p-6"
     >
-      <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-neon-400/5 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 -top-24 hidden h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl dark:block" />
+      <div className="pointer-events-none absolute -bottom-24 -left-16 hidden h-64 w-64 rounded-full bg-neon-400/5 blur-3xl dark:block" />
 
       <div className="relative mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
@@ -172,10 +172,10 @@ export default function RevenueChart({ data }: Props) {
         <LegendItem color={COLORS.ftd} icon={<Wallet className="h-3.5 w-3.5" />} label="FTD" />
         <LegendItem color={COLORS.qftd} icon={<Star className="h-3.5 w-3.5" />} label="QFTD" />
         <LegendItem color={COLORS.comissao} icon={<DollarSign className="h-3.5 w-3.5" />} label="Comissão" />
-        <div className="ml-auto hidden items-center gap-2 rounded-lg border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1.5 text-xs font-semibold text-fuchsia-200 sm:inline-flex">
+        <div className="ml-auto hidden items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 dark:border-fuchsia-400/20 dark:bg-fuchsia-500/10 dark:text-fuchsia-200 sm:inline-flex">
           <TrendingUp className="h-3.5 w-3.5" />
           Comissão total:
-          <span className="text-fuchsia-100 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">
+          <span className="text-fuchsia-800 dark:text-fuchsia-100 dark:drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">
             {totalComissao.toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',

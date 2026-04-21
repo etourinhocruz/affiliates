@@ -29,7 +29,7 @@ export default function Sidebar({ active, onNavigate, mobileOpen, onCloseMobile 
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-gray-200 bg-white transition-[transform,background-color,border-color] duration-300 dark:border-white/5 dark:bg-slate-950/80 dark:backdrop-blur-xl lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-gray-200 bg-white shadow-[2px_0_12px_rgba(15,23,42,0.04)] transition-[transform,background-color,border-color] duration-300 dark:border-white/5 dark:bg-slate-950/80 dark:shadow-none dark:backdrop-blur-xl lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

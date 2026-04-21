@@ -196,9 +196,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#0B0E14] dark:text-slate-200">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-neon-400/10 blur-3xl dark:bg-neon-400/10" />
+    <div className="min-h-screen bg-[#F4F6F8] text-gray-900 transition-colors duration-300 dark:bg-[#0B0E14] dark:text-slate-200">
+      <div className="pointer-events-none fixed inset-0 hidden overflow-hidden dark:block">
+        <div className="absolute -top-40 -right-32 h-96 w-96 rounded-full bg-neon-400/10 blur-3xl" />
         <div className="absolute top-1/2 -left-40 h-96 w-96 rounded-full bg-sky-500/5 blur-3xl" />
       </div>
 
@@ -236,7 +236,7 @@ function Pillar({
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className="group relative animate-rise overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.12)] dark:border-gray-800 dark:bg-[#1E1E24]/70 dark:backdrop-blur-md dark:shadow-none dark:hover:border-white/10 dark:hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
+      className="group relative animate-rise overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(15,23,42,0.12)] dark:border-white/5 dark:bg-[#1E1E24]/70 dark:backdrop-blur-md dark:shadow-none dark:hover:border-white/10 dark:hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
     >
       <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition-all duration-300 group-hover:via-neon-400/70 group-hover:shadow-[0_0_14px_rgba(57,255,20,0.5)]" />
       <div className="flex items-center justify-between">
@@ -260,8 +260,8 @@ function DeltaBadge({ delta, suffix }: { delta: number; suffix?: string }) {
       <span
         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
           positive
-            ? 'bg-neon-400/10 text-neon-300 ring-1 ring-neon-400/30'
-            : 'bg-rose-500/10 text-rose-300 ring-1 ring-rose-400/30'
+            ? 'bg-neon-400/15 text-neon-700 ring-1 ring-neon-400/40 dark:bg-neon-400/10 dark:text-neon-300 dark:ring-neon-400/30'
+            : 'bg-rose-500/10 text-rose-700 ring-1 ring-rose-400/30 dark:text-rose-300'
         }`}
       >
         {positive ? (
@@ -289,7 +289,7 @@ function FooterMetric({
   icon?: React.ReactNode;
 }) {
   const toneMap = {
-    neon: 'text-neon-600 dark:text-neon-300 dark:drop-shadow-[0_0_8px_rgba(57,255,20,0.35)]',
+    neon: 'text-neon-700 dark:text-neon-300 dark:drop-shadow-[0_0_8px_rgba(57,255,20,0.35)]',
     sky: 'text-sky-600 dark:text-sky-300',
     amber: 'text-amber-600 dark:text-amber-300',
   };
@@ -316,9 +316,9 @@ function FinancialPanel({
   format: (v: number) => string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.15)] transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-[#1A1F1C] dark:via-[#1A1A20] dark:to-[#14201A] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] sm:p-8">
-      <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-neon-400/5 blur-3xl" />
+    <div className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition-all duration-300 dark:border-white/5 dark:bg-gradient-to-br dark:from-[#1A1F1C] dark:via-[#1A1A20] dark:to-[#14201A] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] sm:p-8">
+      <div className="pointer-events-none absolute -right-32 -top-32 hidden h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl dark:block" />
+      <div className="pointer-events-none absolute -bottom-24 left-10 hidden h-64 w-64 rounded-full bg-neon-400/5 blur-3xl dark:block" />
 
       <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -338,14 +338,17 @@ function FinancialPanel({
             <p className="mt-1 text-xs text-gray-500 dark:text-slate-500">Participação recorrente na receita</p>
           </div>
 
-          <div className="relative sm:col-span-2 lg:col-span-1 lg:border-l lg:border-gray-200 lg:pl-8 dark:lg:border-white/5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-600 dark:text-neon-300">
-              Saldo Total Disponível
-            </p>
-            <p className="mt-2 text-4xl font-extrabold leading-none text-neon-500 drop-shadow-[0_0_18px_rgba(57,255,20,0.35)] dark:text-neon-300 dark:drop-shadow-[0_0_18px_rgba(57,255,20,0.5)] sm:text-5xl">
-              {format(total)}
-            </p>
-            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">Atualizado em tempo real</p>
+          <div className="relative sm:col-span-2 lg:col-span-1">
+            <div className="relative overflow-hidden rounded-2xl bg-gray-900 p-5 shadow-[0_10px_30px_-10px_rgba(15,23,42,0.4)] dark:bg-transparent dark:p-0 dark:shadow-none lg:border-l lg:border-gray-200 lg:ml-0 lg:pl-5 dark:lg:border-white/5 dark:lg:pl-8">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(57,255,20,0.18),transparent_60%)] dark:hidden" />
+              <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-300">
+                Saldo Total Disponível
+              </p>
+              <p className="relative mt-2 text-4xl font-extrabold leading-none text-neon-300 drop-shadow-[0_0_18px_rgba(57,255,20,0.55)] sm:text-5xl">
+                {format(total)}
+              </p>
+              <p className="relative mt-2 text-xs text-slate-400">Atualizado em tempo real</p>
+            </div>
           </div>
         </div>
 
