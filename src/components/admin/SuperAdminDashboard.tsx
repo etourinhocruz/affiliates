@@ -15,6 +15,13 @@ import {
   TrendingUp,
   Users,
   Zap,
+  UserPlus,
+  Target,
+  Gauge,
+  Wallet,
+  DollarSign,
+  Handshake,
+  Layers,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useUser } from '../../contexts/UserContext';
@@ -186,12 +193,14 @@ export default function SuperAdminDashboard() {
           )}
         </div>
         <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-          Centro de Comando da Plataforma
+          Visão Geral
         </h2>
         <p className="text-sm text-gray-500 dark:text-slate-400">
-          Monitoramento em tempo real das operações globais da Mansão Green Affiliates.
+          Monitoramento consolidado das operações globais da Mansão Green Affiliates.
         </p>
       </header>
+
+      <OverviewMetricsGrid />
 
       <section className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
         <ActionCard
@@ -585,6 +594,157 @@ function StatusBadge({ status }: { status: string }) {
       />
       {active ? 'Ativo' : 'Bloqueado'}
     </span>
+  );
+}
+
+type OverviewMetric = {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  affiliate: string;
+  agency: string;
+  total: string;
+};
+
+const OVERVIEW_METRICS: OverviewMetric[] = [
+  {
+    key: 'registro',
+    label: 'Registro',
+    icon: <UserPlus className="h-5 w-5" />,
+    affiliate: '48.912',
+    agency: '20.723',
+    total: '69.635',
+  },
+  {
+    key: 'ftd',
+    label: 'FTD',
+    icon: <Target className="h-5 w-5" />,
+    affiliate: '12.486',
+    agency: '5.812',
+    total: '18.298',
+  },
+  {
+    key: 'qftd',
+    label: 'QFTD',
+    icon: <Gauge className="h-5 w-5" />,
+    affiliate: '9.172',
+    agency: '4.240',
+    total: '13.412',
+  },
+  {
+    key: 'deposito',
+    label: 'Depósito',
+    icon: <Wallet className="h-5 w-5" />,
+    affiliate: 'R$ 28.412.560,00',
+    agency: 'R$ 12.980.140,00',
+    total: 'R$ 41.392.700,00',
+  },
+  {
+    key: 'rev',
+    label: 'REV',
+    icon: <TrendingUp className="h-5 w-5" />,
+    affiliate: 'R$ 4.128.920,50',
+    agency: 'R$ 2.450.318,80',
+    total: 'R$ 6.579.239,30',
+  },
+  {
+    key: 'cpa',
+    label: 'CPA',
+    icon: <DollarSign className="h-5 w-5" />,
+    affiliate: 'R$ 32.184.660,22',
+    agency: 'R$ 19.929.319,56',
+    total: 'R$ 52.113.979,78',
+  },
+  {
+    key: 'rev_cpa',
+    label: 'REV + CPA',
+    icon: <Handshake className="h-5 w-5" />,
+    affiliate: 'R$ 36.313.580,72',
+    agency: 'R$ 22.379.638,36',
+    total: 'R$ 58.693.219,08',
+  },
+];
+
+function OverviewMetricsGrid() {
+  const columns: { key: 'affiliate' | 'agency' | 'total'; title: string; icon: React.ReactNode; accent: string }[] = [
+    {
+      key: 'affiliate',
+      title: 'Afiliado',
+      icon: <Users className="h-4 w-4" />,
+      accent: 'from-neon-400/20 to-emerald-500/10 text-neon-300',
+    },
+    {
+      key: 'agency',
+      title: 'Agência',
+      icon: <ShieldCheck className="h-4 w-4" />,
+      accent: 'from-sky-400/20 to-sky-500/10 text-sky-300',
+    },
+    {
+      key: 'total',
+      title: 'Total',
+      icon: <Layers className="h-4 w-4" />,
+      accent: 'from-amber-300/20 to-amber-500/10 text-amber-200',
+    },
+  ];
+
+  return (
+    <section className="mb-8">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        {columns.map((col) => (
+          <div key={col.key} className="flex flex-col gap-3">
+            <div
+              className={`relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br ${col.accent} px-4 py-3 text-center shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] backdrop-blur-md`}
+            >
+              <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <div className="inline-flex items-center justify-center gap-2">
+                <span className="opacity-80">{col.icon}</span>
+                <h3 className="text-sm font-extrabold uppercase tracking-[0.28em]">
+                  {col.title}
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {OVERVIEW_METRICS.map((m) => (
+                <OverviewMetricCard
+                  key={m.key}
+                  icon={m.icon}
+                  label={`${m.label} - ${col.title}`}
+                  value={m[col.key]}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OverviewMetricCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-white/5 bg-[#14141A]/80 px-4 py-3 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-400/30 hover:shadow-[0_14px_38px_-12px_rgba(57,255,20,0.18)] dark:bg-[#14141A]/80">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-transparent via-neon-400/0 to-transparent transition group-hover:via-neon-400/70" />
+      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-neon-400/10 text-neon-300 ring-1 ring-neon-400/30 shadow-[0_0_16px_rgba(57,255,20,0.2)] transition group-hover:bg-neon-400/15 group-hover:shadow-[0_0_22px_rgba(57,255,20,0.3)]">
+        {icon}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col items-end text-right">
+        <span className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          {label}
+        </span>
+        <span className="mt-0.5 w-full truncate text-xl font-extrabold tabular-nums text-white">
+          {value}
+        </span>
+      </div>
+    </div>
   );
 }
 
