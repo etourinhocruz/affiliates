@@ -2,21 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
-  Briefcase,
   Cog,
   FileClock,
   Flame,
   Gem,
-  LayoutDashboard,
   LineChart,
-  Network,
-  PieChart,
-  Settings as SettingsIcon,
   Sparkles,
   Trophy,
   UserPlus,
-  Users,
   Wallet,
 } from 'lucide-react';
 import Sidebar, { getMenuForRole } from './components/Sidebar';
@@ -35,6 +28,16 @@ import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
 import UsersManagementPage from './components/admin/UsersManagementPage';
 import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
 import DealsManagementPage from './components/admin/DealsManagementPage';
+import AgencyOverviewPage from './components/agency/AgencyOverviewPage';
+import AgencyNetworkPage from './components/agency/AgencyNetworkPage';
+import AgencyReportsPage from './components/agency/AgencyReportsPage';
+import AgencySettingsPage from './components/agency/AgencySettingsPage';
+import ManagerDashboardPage from './components/manager/ManagerDashboardPage';
+import ManagerAffiliatesPage from './components/manager/ManagerAffiliatesPage';
+import ManagerSettingsPage from './components/manager/ManagerSettingsPage';
+import SubOverviewPage from './components/sub/SubOverviewPage';
+import SubReportsPage from './components/sub/SubReportsPage';
+import SubSettingsPage from './components/sub/SubSettingsPage';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
 import type { DailyMetric } from './lib/supabase';
@@ -392,97 +395,27 @@ function App() {
         );
 
       case 'agency-overview':
-        return (
-          <PlaceholderPage
-            roleLabel="Agency Suite"
-            title="Visão Geral da Agência"
-            subtitle="Performance consolidada de toda a sua rede de afiliados."
-            icon={LayoutDashboard}
-          />
-        );
+        return <AgencyOverviewPage />;
       case 'agency-network':
-        return (
-          <PlaceholderPage
-            roleLabel="Agency Suite"
-            title="Minha Rede"
-            subtitle="Estrutura e performance dos afiliados sob gestão."
-            icon={Network}
-          />
-        );
+        return <AgencyNetworkPage />;
       case 'agency-reports':
-        return (
-          <PlaceholderPage
-            roleLabel="Agency Suite"
-            title="Relatórios"
-            subtitle="Analise os resultados agregados da agência."
-            icon={BarChart3}
-          />
-        );
+        return <AgencyReportsPage />;
       case 'agency-settings':
-        return (
-          <PlaceholderPage
-            roleLabel="Agency Suite"
-            title="Configurações"
-            subtitle="Preferências e dados cadastrais da agência."
-            icon={SettingsIcon}
-          />
-        );
+        return <AgencySettingsPage />;
 
       case 'manager-dashboard':
-        return (
-          <PlaceholderPage
-            roleLabel="Manager Suite"
-            title="Dashboard Gerencial"
-            subtitle="Acompanhe o time de afiliados sob sua gestão."
-            icon={Briefcase}
-          />
-        );
+        return <ManagerDashboardPage />;
       case 'manager-affiliates':
-        return (
-          <PlaceholderPage
-            roleLabel="Manager Suite"
-            title="Afiliados"
-            subtitle="Gerencie metas, comissões e status dos afiliados."
-            icon={Users}
-          />
-        );
+        return <ManagerAffiliatesPage />;
       case 'manager-settings':
-        return (
-          <PlaceholderPage
-            roleLabel="Manager Suite"
-            title="Configurações"
-            subtitle="Preferências gerenciais e notificações."
-            icon={SettingsIcon}
-          />
-        );
+        return <ManagerSettingsPage />;
 
       case 'sub-overview':
-        return (
-          <PlaceholderPage
-            roleLabel="Sub-Afiliado"
-            title="Visão Resumida"
-            subtitle="Resumo simplificado da sua performance."
-            icon={PieChart}
-          />
-        );
+        return <SubOverviewPage />;
       case 'sub-reports':
-        return (
-          <PlaceholderPage
-            roleLabel="Sub-Afiliado"
-            title="Relatórios"
-            subtitle="Consulte os seus dados de conversão."
-            icon={BarChart3}
-          />
-        );
+        return <SubReportsPage />;
       case 'sub-settings':
-        return (
-          <PlaceholderPage
-            roleLabel="Sub-Afiliado"
-            title="Configurações"
-            subtitle="Ajustes da sua conta."
-            icon={SettingsIcon}
-          />
-        );
+        return <SubSettingsPage />;
 
       default:
         return renderDashboard();
