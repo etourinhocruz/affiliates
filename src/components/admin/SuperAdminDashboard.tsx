@@ -6,6 +6,7 @@ import {
   Gauge,
   Handshake,
   Layers,
+  PieChart,
   ShieldCheck,
   Target,
   TrendingUp,
@@ -50,6 +51,8 @@ export default function SuperAdminDashboard() {
     [selectedHouse],
   );
 
+  const platformMargin = 0;
+
   return (
     <div className="pb-10 text-slate-900 animate-rise dark:text-slate-100">
       <header className="mb-6 flex flex-col gap-2">
@@ -85,6 +88,26 @@ export default function SuperAdminDashboard() {
       />
 
       <OverviewMetricsGrid />
+
+      <section className="mt-6">
+        <div className="group relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-white/5 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-400/30 dark:bg-[#1E1E24] dark:shadow-[0_0_50px_rgba(57,255,20,0.06)] dark:backdrop-blur-xl">
+          <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition duration-300 group-hover:via-neon-400/70" />
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-slate-400">
+              Margem de Lucro
+            </p>
+            <div className="rounded-lg bg-neon-400/10 p-2 text-neon-300 ring-1 ring-neon-400/30">
+              <PieChart className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="mt-3 text-4xl font-extrabold tabular-nums text-neon-600 dark:text-neon-300 dark:drop-shadow-[0_0_12px_rgba(57,255,20,0.35)]">
+            {platformMargin.toFixed(1)}%
+          </p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
+            Lucro líquido / GGR · Período selecionado
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

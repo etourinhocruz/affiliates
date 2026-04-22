@@ -23,34 +23,45 @@ type BadgeTone = 'neon' | 'amber' | 'sky' | 'rose' | 'teal';
 
 type BrandConfig = {
   badges: { label: string; icon: typeof Flame; tone: BadgeTone }[];
+  bgClass: string;
 };
 
 const brandConfig: Record<string, BrandConfig> = {
   SUPERBET: {
+    bgClass:
+      'bg-gradient-to-br from-red-500 via-red-600 to-red-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]',
     badges: [
       { label: 'Top Conversão', icon: Flame, tone: 'rose' },
       { label: 'Gamificação', icon: Gamepad2, tone: 'neon' },
     ],
   },
   BETFAIR: {
+    bgClass:
+      'bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]',
     badges: [
       { label: 'Clássico Premium', icon: Trophy, tone: 'amber' },
       { label: 'Alta Retenção', icon: TrendingUp, tone: 'neon' },
     ],
   },
   NOVIBET: {
+    bgClass:
+      'bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
     badges: [
       { label: 'CPA Progressivo', icon: Zap, tone: 'neon' },
       { label: 'Alto Payout', icon: Sparkles, tone: 'teal' },
     ],
   },
   'BET MGM': {
+    bgClass:
+      'bg-gradient-to-br from-amber-500 via-amber-700 to-yellow-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
     badges: [
       { label: 'Marca Global', icon: Trophy, tone: 'amber' },
       { label: 'Cassino Ao Vivo', icon: Sparkles, tone: 'sky' },
     ],
   },
   'ESPORTIVA BET': {
+    bgClass:
+      'bg-gradient-to-br from-sky-400 via-blue-600 to-blue-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
     badges: [
       { label: 'Mobile First', icon: Zap, tone: 'sky' },
       { label: 'Alta FTD', icon: Flame, tone: 'rose' },
@@ -59,6 +70,7 @@ const brandConfig: Record<string, BrandConfig> = {
 };
 
 const defaultBrand: BrandConfig = {
+  bgClass: 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-950',
   badges: [{ label: 'Parceiro Oficial', icon: Sparkles, tone: 'neon' }],
 };
 
@@ -189,6 +201,7 @@ export default function DealsPage() {
   }, [user.email]);
 
   const go = (next: number, dir: 1 | -1) => {
+    if (!deals.length) return;
     setDirection(dir);
     setCurrentIndex(((next % deals.length) + deals.length) % deals.length);
     setAnimKey((k) => k + 1);
@@ -196,6 +209,10 @@ export default function DealsPage() {
 
   const nextDeal = () => go(currentIndex + 1, 1);
   const prevDeal = () => go(currentIndex - 1, -1);
+
+  useEffect(() => {
+    if (currentIndex >= deals.length) setCurrentIndex(0);
+  }, [deals.length, currentIndex]);
 
   const deal = deals[currentIndex];
 
@@ -248,14 +265,20 @@ export default function DealsPage() {
         </button>
 
         <div className="overflow-hidden rounded-3xl">
-          <DealCard
-            key={animKey}
-            deal={deal}
-            direction={direction}
-            isRequested={requested.has(deal.id)}
-            isPending={pending.has(deal.id)}
-            onRequest={requestDeal}
-          />
+          {deal ? (
+            <DealCard
+              key={animKey}
+              deal={deal}
+              direction={direction}
+              isRequested={requested.has(deal.id)}
+              isPending={pending.has(deal.id)}
+              onRequest={requestDeal}
+            />
+          ) : (
+            <div className="flex h-64 items-center justify-center rounded-3xl border border-white/5 bg-[#1E1E24]/80 text-sm text-slate-400">
+              Nenhum deal disponível no momento.
+            </div>
+          )}
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-2">
@@ -294,7 +317,7 @@ function DealCard({
   isPending: boolean;
   onRequest: () => void;
 }) {
-  const key = deal.name.toUpperCase();
+  const key = (deal?.name ?? '').toUpperCase();
   const brand = useMemo(() => brandConfig[key] ?? defaultBrand, [key]);
 
   const enterClass = direction === 1 ? 'animate-slide-in-right' : 'animate-slide-in-left';
@@ -303,8 +326,11 @@ function DealCard({
     <article
       className={`relative overflow-hidden rounded-3xl border border-white/5 bg-[#1E1E24]/90 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl ${enterClass}`}
     >
-      <div className="relative flex h-56 items-center justify-center overflow-hidden sm:h-64">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.06),transparent_55%)]" />
+      <div
+        className={`relative flex h-56 items-center justify-center overflow-hidden sm:h-64 ${brand.bgClass}`}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.18),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_95%,rgba(0,0,0,0.35),transparent_65%)]" />
         <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
         <div className="absolute left-4 top-4 flex flex-wrap gap-1.5">
@@ -329,7 +355,7 @@ function DealCard({
 
       <div className="px-6 pb-7 pt-6 sm:px-8">
         <h3 className="text-2xl font-bold tracking-tight text-white sm:text-[26px]">
-          {deal.name}
+          {deal?.name ?? '—'}
         </h3>
         <p className="mt-1 text-sm text-slate-400">
           Casa parceira oficial da Mansão Green Affiliates.
@@ -340,27 +366,27 @@ function DealCard({
             icon={<BadgeDollarSign className="h-3.5 w-3.5" />}
             label="Deal CPA"
             value={
-              deal.cpa_value === 'Progressivo'
+              deal?.cpa_value === 'Progressivo'
                 ? 'Progressivo'
-                : `R$ ${deal.cpa_value}`
+                : `R$ ${deal?.cpa_value ?? '—'}`
             }
             highlight
           />
           <Metric
             icon={<TrendingUp className="h-3.5 w-3.5" />}
             label="Deal Rev"
-            value={hasValidRev(deal.rev_value) ? `${deal.rev_value}%` : '—'}
-            muted={!hasValidRev(deal.rev_value)}
+            value={hasValidRev(deal?.rev_value) ? `${deal?.rev_value}%` : '—'}
+            muted={!hasValidRev(deal?.rev_value)}
           />
           <Metric
             icon={<Coins className="h-3.5 w-3.5" />}
             label="Dep. Mín."
-            value={`R$ ${deal.deposito_min}`}
+            value={`R$ ${deal?.deposito_min ?? '—'}`}
           />
           <Metric
             icon={<Target className="h-3.5 w-3.5" />}
             label="Aposta Mín."
-            value={`R$ ${deal.aposta_min}`}
+            value={`R$ ${deal?.aposta_min ?? '—'}`}
           />
         </div>
 
@@ -457,7 +483,17 @@ function hasValidRev(value: string | null | undefined): boolean {
 }
 
 function BrandLogo({ deal }: { deal: Deal }) {
-  const name = deal.name.toUpperCase();
+  const name = (deal?.name ?? '').toUpperCase();
+  const [broken, setBroken] = useState(false);
+  const fallback = (
+    <span className="rounded-2xl bg-black/30 px-5 py-3 text-4xl font-black tracking-tight text-white ring-1 ring-white/20 backdrop-blur-sm drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] sm:text-5xl">
+      {deal?.name ?? 'Parceiro'}
+    </span>
+  );
+  if (broken) return fallback;
+  const imgProps = {
+    onError: () => setBroken(true),
+  } as const;
 
   if (name === 'BET MGM') {
     return (
@@ -465,6 +501,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
         src="/BETMGM-Logo-Stylish-Presentation-PNG.png"
         alt="BetMGM"
         className="max-h-36 w-auto object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.55)] sm:max-h-44"
+        {...imgProps}
       />
     );
   }
@@ -474,6 +511,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
         src="/superbet-logo-0.png"
         alt="Superbet"
         className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(220,38,38,0.35)] sm:max-h-40"
+        {...imgProps}
       />
     );
   }
@@ -483,6 +521,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
         src="/betfair-logo-0-1536x1536.png"
         alt="betfair"
         className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(255,184,12,0.3)] sm:max-h-40"
+        {...imgProps}
       />
     );
   }
@@ -492,6 +531,7 @@ function BrandLogo({ deal }: { deal: Deal }) {
         src="/novibet-seeklogo.png"
         alt="novibet"
         className="max-h-40 w-auto object-contain drop-shadow-[0_10px_24px_rgba(16,185,129,0.4)] sm:max-h-48"
+        {...imgProps}
       />
     );
   }
@@ -501,13 +541,10 @@ function BrandLogo({ deal }: { deal: Deal }) {
         src="/ESPORTIVA_PNG.png"
         alt="EsportivaBet"
         className="max-h-32 w-auto object-contain drop-shadow-[0_10px_24px_rgba(59,130,246,0.35)] sm:max-h-40"
+        {...imgProps}
       />
     );
   }
 
-  return (
-    <span className="text-4xl font-black tracking-tight text-white drop-shadow-[0_8px_24px_rgba(57,255,20,0.4)] sm:text-5xl">
-      {deal.name}
-    </span>
-  );
+  return fallback;
 }
