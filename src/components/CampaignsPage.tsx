@@ -11,6 +11,8 @@ import {
   Building2,
   Search,
   Megaphone,
+  ChevronDown,
+  Sparkles,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -107,7 +109,7 @@ const mockCampaigns: Campaign[] = [
   },
 ];
 
-type FormState = { house: string; name: string; pixelUrl: string };
+type FormState = { house: string; name: string };
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
@@ -171,7 +173,6 @@ export default function CampaignsPage() {
       house: form.house,
       status: 'Pendente',
       trackingLink: '',
-      pixelUrl: form.pixelUrl,
       clicks: 0,
       ftds: 0,
     };
@@ -186,7 +187,6 @@ export default function CampaignsPage() {
         house: form.house,
         status: 'Pendente',
         tracking_link: '',
-        pixel_url: form.pixelUrl,
         clicks: 0,
         ftds: 0,
       });
@@ -525,98 +525,174 @@ function RequestModal({
 }) {
   const [house, setHouse] = useState('');
   const [name, setName] = useState('');
-  const [pixelUrl, setPixelUrl] = useState('');
   const [touched, setTouched] = useState(false);
+  const [houseOpen, setHouseOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
 
   const valid = house.trim() !== '' && name.trim() !== '';
+  const selected = HOUSES.find((h) => h.key === house);
 
   const submit = () => {
     setTouched(true);
     if (!valid) return;
-    onSubmit({ house, name: name.trim(), pixelUrl: pixelUrl.trim() });
+    onSubmit({ house, name: name.trim() });
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#14141A] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.8)]"
+        className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-[#39FF14]/20 bg-[#14141A]/90 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9),0_0_60px_rgba(57,255,20,0.08)] backdrop-blur-2xl animate-fade-in"
       >
-        <div className="flex items-start justify-between border-b border-white/5 px-6 py-4">
-          <div>
-            <h3 className="text-lg font-semibold text-white">Solicitar Campanha</h3>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Preencha os dados da sua origem de tráfego.
-            </p>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_-10%,rgba(57,255,20,0.14),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#39FF14]/40 to-transparent" />
+
+        <div className="relative flex items-start justify-between px-7 pt-7 pb-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neon-400/10 ring-1 ring-neon-400/30 shadow-[0_0_18px_rgba(57,255,20,0.22)]">
+              <Sparkles className="h-5 w-5 text-neon-300" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold tracking-tight text-white">
+                Solicitar Nova Campanha
+              </h3>
+              <p className="mt-1 text-sm text-slate-400">
+                Crie um novo link de rastreio para uma de suas parcerias ativas.
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
+            aria-label="Fechar"
             className="rounded-lg p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="space-y-4 px-6 py-5">
-          <div className="flex items-start gap-2 rounded-lg border border-amber-400/20 bg-amber-400/5 px-3 py-2.5 text-xs leading-relaxed text-amber-200/90">
-            <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-            Seu link será revisado e liberado em até 24h.
-          </div>
-
+        <div className="relative space-y-5 px-7 pb-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Casa de Apostas <span className="text-rose-400">*</span>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Selecione a Casa de Aposta
             </label>
-            <select
-              value={house}
-              onChange={(e) => setHouse(e.target.value)}
-              className={`w-full rounded-xl border bg-slate-900/80 px-3 py-2.5 text-sm text-white focus:outline-none ${
-                touched && !house ? 'border-rose-400/50' : 'border-white/10 focus:border-neon-400/50'
-              }`}
-            >
-              <option value="">Selecione uma casa...</option>
-              {HOUSES.map((h) => (
-                <option key={h.key} value={h.key}>
-                  {h.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setHouseOpen((o) => !o)}
+                className={`flex w-full items-center justify-between gap-3 rounded-xl border bg-black/40 px-3 py-3 text-left text-sm text-white transition hover:border-white/20 ${
+                  touched && !house
+                    ? 'border-rose-400/50'
+                    : houseOpen
+                      ? 'border-neon-400/60 shadow-[0_0_0_4px_rgba(57,255,20,0.08)]'
+                      : 'border-white/10'
+                }`}
+              >
+                {selected ? (
+                  <span className="flex items-center gap-3">
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg ring-1 ring-white/10 ${selected.bg}`}
+                    >
+                      {selected.logoUrl ? (
+                        <img
+                          src={selected.logoUrl}
+                          alt={selected.name}
+                          className="h-full w-full object-contain p-1"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-bold text-white">
+                          {selected.initials}
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-semibold">{selected.name}</span>
+                  </span>
+                ) : (
+                  <span className="text-slate-500">Escolha uma casa parceira ativa...</span>
+                )}
+                <ChevronDown
+                  className={`h-4 w-4 flex-shrink-0 text-slate-400 transition ${
+                    houseOpen ? 'rotate-180 text-neon-300' : ''
+                  }`}
+                />
+              </button>
+
+              {houseOpen && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-2 overflow-hidden rounded-xl border border-white/10 bg-[#0F0F14]/95 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+                  <ul className="max-h-64 overflow-y-auto py-1">
+                    {HOUSES.map((h) => {
+                      const isSel = h.key === house;
+                      return (
+                        <li key={h.key}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setHouse(h.key);
+                              setHouseOpen(false);
+                            }}
+                            className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition hover:bg-neon-400/10 ${
+                              isSel ? 'bg-neon-400/10 text-neon-300' : 'text-slate-200'
+                            }`}
+                          >
+                            <span
+                              className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg ring-1 ring-white/10 ${h.bg}`}
+                            >
+                              {h.logoUrl ? (
+                                <img
+                                  src={h.logoUrl}
+                                  alt={h.name}
+                                  className="h-full w-full object-contain p-1"
+                                />
+                              ) : (
+                                <span className="text-[10px] font-bold text-white">
+                                  {h.initials}
+                                </span>
+                              )}
+                            </span>
+                            <span className="flex-1 font-semibold">{h.name}</span>
+                            {isSel && <Check className="h-4 w-4" />}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Nome / Origem do Tráfego <span className="text-rose-400">*</span>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Nome da Campanha
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Instagram Bio, Facebook Ads, TikTok Reels"
-              className={`w-full rounded-xl border bg-slate-900/80 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none ${
-                touched && !name ? 'border-rose-400/50' : 'border-white/10 focus:border-neon-400/50'
+              placeholder="Ex: TikTok Ads, Bio do Instagram"
+              className={`w-full rounded-xl border bg-black/40 px-3 py-3 text-sm text-white placeholder:text-slate-500 transition focus:outline-none ${
+                touched && !name
+                  ? 'border-rose-400/50'
+                  : 'border-white/10 focus:border-neon-400/60 focus:shadow-[0_0_0_4px_rgba(57,255,20,0.08)]'
               }`}
             />
           </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Pixel / Postback <span className="text-slate-500">(opcional)</span>
-            </label>
-            <input
-              value={pixelUrl}
-              onChange={(e) => setPixelUrl(e.target.value)}
-              placeholder="https://seu-pixel.com/postback?..."
-              className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-neon-400/50 focus:outline-none"
-            />
-            <p className="mt-1.5 text-[11px] text-slate-500">
-              Se você utiliza tracker próprio, cole aqui a URL do postback.
-            </p>
-          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-white/5 bg-black/20 px-6 py-4">
+        <div className="relative mt-6 flex items-center justify-end gap-3 border-t border-white/5 bg-black/20 px-7 py-4">
           <button
             onClick={onClose}
             className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-400 transition hover:text-white"
@@ -625,9 +701,10 @@ function RequestModal({
           </button>
           <button
             onClick={submit}
-            className="inline-flex items-center gap-2 rounded-xl bg-neon-400 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-950 shadow-[0_0_24px_rgba(57,255,20,0.35)] transition hover:bg-neon-300"
+            className="inline-flex items-center gap-2 rounded-xl bg-neon-400 px-5 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-950 shadow-[0_0_24px_rgba(57,255,20,0.4)] transition hover:bg-neon-300 hover:shadow-[0_0_32px_rgba(57,255,20,0.6)]"
           >
-            Enviar Solicitação
+            <Check className="h-4 w-4" />
+            Confirmar Solicitação
           </button>
         </div>
       </div>
