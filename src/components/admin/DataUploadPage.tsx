@@ -87,38 +87,44 @@ export default function DataUploadPage() {
     }
 
     setPersisting(true);
-    const acids = list.map((r) => r.acid);
-    const { data: existing } = await supabase
-      .from('campaign_assignments')
-      .select('acid')
-      .eq('bet_house', betHouse)
-      .in('acid', acids);
-    const existingSet = new Set((existing || []).map((e) => String(e.acid)));
-
     const nowIso = new Date().toISOString();
     const payload = list.map((r) => ({
       bet_house: betHouse,
       site_id: r.siteId,
       site_name: r.siteName,
       acid: r.acid,
+      campaign_key: `${betHouse}::${r.siteId}::${r.acid}`,
       ftd: Number(r.ftd) || 0,
       revenue: Number(r.revenue) || 0,
       last_seen_at: nowIso,
       updated_at: nowIso,
     }));
+    const keys = payload.map((p) => p.campaign_key);
+
+    const { data: existing } = await supabase
+      .from('campaign_assignments')
+      .select('campaign_key')
+      .in('campaign_key', keys);
+    const existingSet = new Set(
+      (existing || []).map((e) => String(e.campaign_key)),
+    );
 
     const { error } = await supabase
       .from('campaign_assignments')
-      .upsert(payload, { onConflict: 'bet_house,acid' });
+      .upsert(payload, { onConflict: 'campaign_key' });
 
     setPersisting(false);
 
     if (error) {
-      setParseError('Não foi possível salvar as campanhas no banco.');
+      setParseError(
+        `Não foi possível salvar as campanhas no banco: ${error.message}`,
+      );
       return;
     }
 
-    const inserted = payload.filter((p) => !existingSet.has(p.acid)).length;
+    const inserted = payload.filter(
+      (p) => !existingSet.has(p.campaign_key),
+    ).length;
     const updated = payload.length - inserted;
     setPersistResult({ inserted, updated });
   };
