@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Calendar,
   ChevronDown,
@@ -6,16 +6,17 @@ import {
   Gauge,
   Handshake,
   Layers,
-  PieChart,
   ShieldCheck,
   Target,
   TrendingUp,
   UserPlus,
+  UserSearch,
   Users,
   Wallet,
   Zap,
 } from 'lucide-react';
 import { useUser } from '../../contexts/UserContext';
+import { supabase } from '../../lib/supabase';
 
 const HOUSE_CATALOG: { key: string; label: string }[] = [
   { key: 'all', label: 'Todas as Casas' },
@@ -40,74 +41,85 @@ function todayISO(offsetDays = 0) {
   return d.toISOString().slice(0, 10);
 }
 
+type PartnerOption = { id: string; name: string; role: 'AFFILIATE' | 'AGENCY' };
+
 export default function SuperAdminDashboard() {
   const { selectedHouse, setSelectedHouse } = useUser();
   const [partnerType, setPartnerType] = useState<PartnerType>('all');
   const [dateStart, setDateStart] = useState<string>(todayISO(29));
   const [dateEnd, setDateEnd] = useState<string>(todayISO(0));
+  const [affiliates, setAffiliates] = useState<PartnerOption[]>([]);
+  const [agencies, setAgencies] = useState<PartnerOption[]>([]);
+  const [selectedAffiliate, setSelectedAffiliate] = useState<string>('all');
+  const [selectedAgency, setSelectedAgency] = useState<string>('all');
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('admin_users')
+        .select('id, name, role')
+        .in('role', ['AFFILIATE', 'AGENCY'])
+        .order('name', { ascending: true });
+      if (!data) return;
+      const rows = data as PartnerOption[];
+      setAffiliates(rows.filter((r) => r.role === 'AFFILIATE'));
+      setAgencies(rows.filter((r) => r.role === 'AGENCY'));
+    })();
+  }, []);
 
   const houseLabel = useMemo(
     () => HOUSE_CATALOG.find((h) => h.key === selectedHouse)?.label,
     [selectedHouse],
   );
 
-  const platformMargin = 0;
-
   return (
     <div className="pb-10 text-slate-900 animate-rise dark:text-slate-100">
-      <header className="mb-6 flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-neon-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-neon-600 ring-1 ring-neon-400/30 dark:text-neon-300">
-            <ShieldCheck className="h-3 w-3" />
-            Super Admin Console
-          </span>
-          {houseLabel && selectedHouse !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-600 ring-1 ring-sky-400/30 dark:text-sky-300">
-              <Zap className="h-3 w-3" />
-              Filtro: {houseLabel}
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center">
+        <header className="mb-6 flex w-full flex-col items-center gap-2 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-neon-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-neon-600 ring-1 ring-neon-400/30 dark:text-neon-300">
+              <ShieldCheck className="h-3 w-3" />
+              Super Admin Console
             </span>
-          )}
-        </div>
-        <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-          Visão Geral
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-slate-400">
-          Monitoramento consolidado das operações globais da Mansão Green Affiliates.
-        </p>
-      </header>
-
-      <FilterBar
-        selectedHouse={selectedHouse}
-        onHouseChange={setSelectedHouse}
-        partnerType={partnerType}
-        onPartnerTypeChange={setPartnerType}
-        dateStart={dateStart}
-        dateEnd={dateEnd}
-        onDateStartChange={setDateStart}
-        onDateEndChange={setDateEnd}
-      />
-
-      <OverviewMetricsGrid />
-
-      <section className="mt-6">
-        <div className="group relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-white/5 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-400/30 dark:bg-[#1E1E24] dark:shadow-[0_0_50px_rgba(57,255,20,0.06)] dark:backdrop-blur-xl">
-          <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-400/0 to-transparent transition duration-300 group-hover:via-neon-400/70" />
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-slate-400">
-              Margem de Lucro
-            </p>
-            <div className="rounded-lg bg-neon-400/10 p-2 text-neon-300 ring-1 ring-neon-400/30">
-              <PieChart className="h-5 w-5" />
-            </div>
+            {houseLabel && selectedHouse !== 'all' && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-600 ring-1 ring-sky-400/30 dark:text-sky-300">
+                <Zap className="h-3 w-3" />
+                Filtro: {houseLabel}
+              </span>
+            )}
           </div>
-          <p className="mt-3 text-4xl font-extrabold tabular-nums text-neon-600 dark:text-neon-300 dark:drop-shadow-[0_0_12px_rgba(57,255,20,0.35)]">
-            {platformMargin.toFixed(1)}%
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Visão Geral
+          </h2>
+          <p className="max-w-2xl text-sm text-gray-500 dark:text-slate-400">
+            Monitoramento consolidado das operações globais da Mansão Green Affiliates.
           </p>
-          <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
-            Lucro líquido / GGR · Período selecionado
-          </p>
+        </header>
+
+        <div className="w-full">
+          <FilterBar
+            selectedHouse={selectedHouse}
+            onHouseChange={setSelectedHouse}
+            partnerType={partnerType}
+            onPartnerTypeChange={setPartnerType}
+            dateStart={dateStart}
+            dateEnd={dateEnd}
+            onDateStartChange={setDateStart}
+            onDateEndChange={setDateEnd}
+          />
         </div>
-      </section>
+
+        <div className="w-full">
+          <OverviewMetricsGrid
+            affiliates={affiliates}
+            agencies={agencies}
+            selectedAffiliate={selectedAffiliate}
+            selectedAgency={selectedAgency}
+            onAffiliateChange={setSelectedAffiliate}
+            onAgencyChange={setSelectedAgency}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -296,28 +308,48 @@ const OVERVIEW_METRICS: OverviewMetric[] = [
   },
 ];
 
-function OverviewMetricsGrid() {
+type OverviewMetricsGridProps = {
+  affiliates: PartnerOption[];
+  agencies: PartnerOption[];
+  selectedAffiliate: string;
+  selectedAgency: string;
+  onAffiliateChange: (v: string) => void;
+  onAgencyChange: (v: string) => void;
+};
+
+function OverviewMetricsGrid({
+  affiliates,
+  agencies,
+  selectedAffiliate,
+  selectedAgency,
+  onAffiliateChange,
+  onAgencyChange,
+}: OverviewMetricsGridProps) {
   const columns: {
     key: 'affiliate' | 'agency' | 'total';
     title: string;
+    subtitle: string;
     icon: React.ReactNode;
     accent: string;
   }[] = [
     {
       key: 'affiliate',
       title: 'Afiliado',
+      subtitle: 'Comissão paga ao afiliado',
       icon: <Users className="h-4 w-4" />,
       accent: 'from-neon-400/20 to-emerald-500/10 text-neon-300',
     },
     {
       key: 'agency',
       title: 'Agência',
+      subtitle: 'Comissão líquida da agência (lucro)',
       icon: <ShieldCheck className="h-4 w-4" />,
       accent: 'from-sky-400/20 to-sky-500/10 text-sky-300',
     },
     {
       key: 'total',
       title: 'Total',
+      subtitle: 'Afiliado + Agência (consolidado)',
       icon: <Layers className="h-4 w-4" />,
       accent: 'from-amber-300/20 to-amber-500/10 text-amber-200',
     },
@@ -338,6 +370,35 @@ function OverviewMetricsGrid() {
                   {col.title}
                 </h3>
               </div>
+              <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-300/80">
+                {col.subtitle}
+              </p>
+
+              {col.key === 'affiliate' && (
+                <div className="mt-3">
+                  <PartnerSelect
+                    placeholder="Filtrar afiliado"
+                    value={selectedAffiliate}
+                    onChange={onAffiliateChange}
+                    options={affiliates}
+                  />
+                </div>
+              )}
+              {col.key === 'agency' && (
+                <div className="mt-3">
+                  <PartnerSelect
+                    placeholder="Filtrar agência"
+                    value={selectedAgency}
+                    onChange={onAgencyChange}
+                    options={agencies}
+                  />
+                </div>
+              )}
+              {col.key === 'total' && (
+                <p className="mt-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-[10px] font-semibold text-slate-300">
+                  Ex.: acordo R$ 200 · afiliado R$ 100 · agência R$ 100 → total R$ 200
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-3">
@@ -354,6 +415,41 @@ function OverviewMetricsGrid() {
         ))}
       </div>
     </section>
+  );
+}
+
+function PartnerSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: PartnerOption[];
+  placeholder: string;
+}) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <UserSearch className="h-4 w-4" />
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none rounded-lg border border-white/10 bg-black/40 py-2 pl-9 pr-9 text-left text-xs font-semibold text-white transition focus:border-white/40 focus:outline-none"
+      >
+        <option value="all" className="bg-[#14141A]">
+          {placeholder} · Todos
+        </option>
+        {options.map((o) => (
+          <option key={o.id} value={o.id} className="bg-[#14141A]">
+            {o.name}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+    </div>
   );
 }
 
