@@ -7,6 +7,7 @@ import {
 } from 'react';
 import {
   ArrowRight,
+  Banknote,
   Check,
   ChevronDown,
   Eye,
@@ -15,6 +16,7 @@ import {
   Mail,
   Search,
   Sparkles,
+  UserPlus,
   X,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -112,7 +114,14 @@ export default function LoginPage({ onSuccess }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-black text-slate-200">
+    <div className="relative flex min-h-screen w-full overflow-hidden text-slate-200">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 120% 90% at 25% 10%, #0F4A3A 0%, #093829 28%, #052620 55%, #021612 80%, #000807 100%)',
+        }}
+      />
       <BrandPanel />
       <AccessPanel
         accounts={accounts}
@@ -129,6 +138,9 @@ export default function LoginPage({ onSuccess }: Props) {
         error={error}
         onSubmit={handleSubmit}
       />
+      <p className="pointer-events-none absolute bottom-5 left-1/2 z-20 w-full -translate-x-1/2 whitespace-nowrap px-4 text-center text-xs text-slate-500/80">
+        &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
+      </p>
     </div>
   );
 }
@@ -136,13 +148,6 @@ export default function LoginPage({ onSuccess }: Props) {
 function BrandPanel() {
   return (
     <aside className="relative hidden w-1/2 overflow-hidden lg:flex">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 120% 90% at 50% 10%, #0F4A3A 0%, #093829 28%, #052620 55%, #021612 80%, #000807 100%)',
-        }}
-      />
       <div
         className="absolute inset-0 opacity-[0.22]"
         style={{
@@ -200,15 +205,65 @@ function BrandPanel() {
         </p>
 
         <CommissionCard />
-
-        <p
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-xs text-slate-500 animate-hero"
-          style={{ animationDelay: '620ms' }}
-        >
-          &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
-        </p>
+        <AffiliateStats />
       </div>
     </aside>
+  );
+}
+
+function AffiliateStats() {
+  return (
+    <div
+      className="group relative mt-5 w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_40px_rgba(57,255,20,0.08)] backdrop-blur-2xl animate-hero transition-all duration-500 hover:-translate-y-1 hover:border-[#39FF14]/25 hover:shadow-[0_40px_90px_-30px_rgba(0,0,0,0.95),0_0_48px_rgba(57,255,20,0.16)]"
+      style={{ animationDelay: '540ms' }}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(57,255,20,0.12),transparent_55%)]" />
+      <div className="relative grid grid-cols-2 gap-5">
+        <StatCell
+          icon={<UserPlus className="h-4 w-4 text-[#7CFF58]" />}
+          label="Novos Registros"
+          value="1.420"
+          trend="+12% esta semana"
+        />
+        <div className="pointer-events-none absolute inset-y-2 left-1/2 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+        <StatCell
+          icon={<Banknote className="h-4 w-4 text-[#7CFF58]" />}
+          label="Payout Total"
+          value="R$ 52.180"
+          trend="+8,4% vs. mês passado"
+        />
+      </div>
+    </div>
+  );
+}
+
+function StatCell({
+  icon,
+  label,
+  value,
+  trend,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend: string;
+}) {
+  return (
+    <div className="relative">
+      <div className="flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#39FF14]/10 ring-1 ring-[#39FF14]/30">
+          {icon}
+        </span>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300/70">
+          {label}
+        </p>
+      </div>
+      <p className="mt-3 text-2xl font-extrabold tracking-tight text-white">{value}</p>
+      <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-[#7CFF58]">
+        <ArrowRight className="h-3 w-3 -rotate-45" />
+        {trend}
+      </p>
+    </div>
   );
 }
 
@@ -332,17 +387,24 @@ function AccessPanel({
   }, [selectedAccount]);
 
   return (
-    <section className="relative flex w-full flex-1 items-center justify-center overflow-hidden bg-black px-4 py-12 sm:px-8">
+    <section className="relative flex w-full flex-1 items-center justify-center overflow-hidden px-4 py-12 sm:px-8">
+      <div
+        className="pointer-events-none absolute inset-0 lg:block hidden"
+        style={{
+          background:
+            'radial-gradient(ellipse 110% 90% at 80% 15%, rgba(15,74,58,0.55) 0%, rgba(9,56,41,0.35) 35%, rgba(5,38,32,0.15) 65%, transparent 90%)',
+        }}
+      />
       <GreenDust />
 
       <div
         className="relative z-10 w-full max-w-md animate-hero"
         style={{ animationDelay: '200ms' }}
       >
-        <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.04] blur-2xl" />
-        <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_60px_rgba(57,255,20,0.07)]" />
+        <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.06] blur-2xl" />
+        <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_80px_rgba(57,255,20,0.12)]" />
 
-        <div className="relative rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_60px_rgba(57,255,20,0.06)] backdrop-blur-2xl transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_100px_rgba(57,255,20,0.14)] sm:p-10">
+        <div className="relative rounded-3xl border border-[#39FF14]/20 bg-white/[0.04] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_80px_rgba(57,255,20,0.12),inset_0_1px_0_rgba(57,255,20,0.15)] backdrop-blur-2xl transition-shadow duration-500 hover:border-[#39FF14]/35 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_120px_rgba(57,255,20,0.22),inset_0_1px_0_rgba(57,255,20,0.25)] sm:p-10">
           <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
           <div className="mb-8 text-center lg:hidden">
