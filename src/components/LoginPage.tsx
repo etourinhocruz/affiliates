@@ -1,28 +1,99 @@
-import { useState, type FormEvent } from 'react';
-import { ArrowRight, Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react';
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  Search,
+  Sparkles,
+  X,
+} from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useUser, type Role } from '../contexts/UserContext';
 
-type Props = {
-  onSuccess: () => void;
+type DemoAccount = {
+  email: string;
+  password: string;
+  display_name: string;
+  role: Role;
 };
 
-export default function LoginPage({ onSuccess }: Props) {
-  const VALID_EMAIL = 'pierre@affiliates.com';
-  const VALID_PASSWORD = 'Pierre@2026';
+const FALLBACK_ACCOUNTS: DemoAccount[] = [
+  { email: 'pierre@affiliates.com', password: 'Pierre@2026', display_name: 'Pierre Castro', role: 'AFFILIATE' },
+  { email: 'rodrigo.alves@gmail.com', password: 'Rodrigo@2026', display_name: 'Rodrigo Alves', role: 'AFFILIATE' },
+  { email: 'marina.q@tuboreomedia.com', password: 'Marina@2026', display_name: 'Marina Queiroz', role: 'AFFILIATE' },
+  { email: 'fernanda@tuboreomedia.com', password: 'Agency@2026', display_name: 'Fernanda Arruda', role: 'AGENCY' },
+  { email: 'marcus.manager@mansaogreen.com', password: 'Manager@2026', display_name: 'Marcus Trader', role: 'MANAGER' },
+  { email: 'carlos.s@gmail.com', password: 'Sub@2026', display_name: 'Carlos Simões', role: 'SUB_AFFILIATE' },
+  { email: 'admin@mansaogreen.com', password: 'Admin@2026', display_name: 'Diretor Geral', role: 'SUPER_ADMIN' },
+];
 
-  const [email, setEmail] = useState(VALID_EMAIL);
-  const [password, setPassword] = useState(VALID_PASSWORD);
+const ROLE_LABEL: Record<Role, string> = {
+  SUPER_ADMIN: 'Super Admin',
+  AGENCY: 'Agência',
+  MANAGER: 'Gerente',
+  AFFILIATE: 'Afiliado',
+  SUB_AFFILIATE: 'Sub-Afiliado',
+};
+
+type Props = { onSuccess: () => void };
+
+export default function LoginPage({ onSuccess }: Props) {
+  const { setRole, updateUser } = useUser();
+  const [accounts, setAccounts] = useState<DemoAccount[]>(FALLBACK_ACCOUNTS);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('login_demo_accounts')
+        .select('email,password,display_name,role')
+        .order('sort_order', { ascending: true });
+      if (data && data.length) setAccounts(data as DemoAccount[]);
+    })();
+  }, []);
+
+  const selectedAccount = useMemo(
+    () => accounts.find((a) => a.email === email),
+    [accounts, email],
+  );
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    setPassword('');
+    if (error) setError(null);
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (error) setError(null);
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (loading) return;
     setError(null);
 
-    if (email.trim() !== VALID_EMAIL || password !== VALID_PASSWORD) {
-      setError('Credenciais inválidas. Tente novamente.');
+    if (!selectedAccount) {
+      setError('Selecione um e-mail da lista autorizada.');
+      return;
+    }
+    if (password !== selectedAccount.password) {
+      setError('Senha incorreta para o usuário selecionado.');
       return;
     }
 
@@ -30,373 +101,613 @@ export default function LoginPage({ onSuccess }: Props) {
     window.setTimeout(() => {
       if (remember) localStorage.setItem('amg.session', '1');
       else sessionStorage.setItem('amg.session', '1');
+      setRole(selectedAccount.role);
+      updateUser({
+        name: selectedAccount.display_name,
+        email: selectedAccount.email,
+      });
       setLoading(false);
       onSuccess();
-    }, 1500);
+    }, 1200);
   };
 
   return (
     <div className="flex min-h-screen w-full bg-black text-slate-200">
-      {/* Left column — Branding / Immersion */}
-      <aside className="relative hidden w-1/2 overflow-hidden lg:flex">
-        {/* Mesh gradient base */}
-        <div className="absolute inset-0 bg-black" />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse 80% 60% at 20% 15%, rgba(16,66,40,0.75), transparent 60%), radial-gradient(ellipse 60% 50% at 85% 90%, rgba(6,36,22,0.8), transparent 60%), radial-gradient(ellipse 70% 55% at 50% 50%, rgba(12,48,28,0.55), transparent 65%), linear-gradient(180deg, #030806 0%, #000000 100%)',
-          }}
-        />
-        {/* Subtle top light sweep */}
-        <div
-          className="absolute -top-40 left-1/2 h-[60%] w-[120%] -translate-x-1/2 opacity-60"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, rgba(57,255,20,0.10) 0%, rgba(57,255,20,0.04) 30%, transparent 70%)',
-          }}
-        />
-        {/* Diagonal grid with mask fade */}
-        <div
-          className="absolute inset-0 opacity-[0.22]"
-          style={{
-            backgroundImage:
-              'linear-gradient(45deg, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(-45deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 70% 70% at 40% 40%, black 30%, transparent 75%)',
-            maskImage:
-              'radial-gradient(ellipse 70% 70% at 40% 40%, black 30%, transparent 75%)',
-          }}
-        />
-        {/* Neon orbs */}
-        <div className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[#39FF14]/10 blur-[140px]" />
-        <div className="absolute -bottom-40 right-0 h-[24rem] w-[24rem] rounded-full bg-emerald-600/10 blur-[140px]" />
-
-        <div className="relative z-10 flex w-full flex-col justify-center p-14 xl:pl-20 xl:pr-16 xl:py-20">
-          {/* Hero copy */}
-          <div className="max-w-xl">
-            <div
-              className="mb-8 flex animate-hero"
-              style={{ animationDelay: '0ms' }}
-            >
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-black p-2 ring-1 ring-[#39FF14]/40 shadow-[0_0_32px_rgba(57,255,20,0.42)]">
-                <img
-                  src="/AFFILIATES_LOGO_PNG_(2).png"
-                  alt="Mansão Green Affiliates"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-            </div>
-
-            <h1
-              className="text-[60px] font-extrabold leading-[0.98] tracking-[-0.035em] animate-hero xl:text-[78px]"
-              style={{ animationDelay: '220ms' }}
-            >
-              <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                O Seu
-              </span>{' '}
-              <span className="relative inline-block bg-gradient-to-r from-[#7CFF58] via-[#39FF14] to-emerald-400 bg-clip-text pr-1 text-transparent drop-shadow-[0_0_30px_rgba(57,255,20,0.45)]">
-                Império
-              </span>
-              <br />
-              <span className="bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                no iGaming.
-              </span>
-            </h1>
-
-            <p
-              className="mt-6 max-w-lg text-base leading-relaxed text-slate-400 animate-hero xl:text-[17px]"
-              style={{ animationDelay: '340ms' }}
-            >
-              Gerencie suas campanhas, acompanhe suas comissões em tempo real e
-              desbloqueie prêmios exclusivos no programa mais premium do mercado.
-            </p>
-
-            {/* Floating glass card with minimal growth chart */}
-            <div
-              className="group relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-hero transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02] hover:border-[#39FF14]/25 hover:shadow-[0_40px_90px_-30px_rgba(0,0,0,0.95),0_0_40px_rgba(57,255,20,0.12)]"
-              style={{ animationDelay: '460ms' }}
-            >
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(57,255,20,0.12),transparent_55%)]" />
-              <div className="relative flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Comissão Acumulada
-                  </p>
-                  <p className="mt-2 text-3xl font-extrabold tracking-tight text-white">
-                    R$ 184.320
-                  </p>
-                  <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#7CFF58]">
-                    <ArrowRight className="h-3 w-3 -rotate-45" />
-                    +38,2% este mês
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#39FF14]/10 ring-1 ring-[#39FF14]/30">
-                  <Sparkles className="h-4 w-4 text-[#7CFF58]" />
-                </div>
-              </div>
-
-              <div className="relative mt-5 h-[92px] w-full">
-                <svg
-                  viewBox="0 0 400 100"
-                  preserveAspectRatio="none"
-                  className="h-full w-full overflow-visible"
-                >
-                  <defs>
-                    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#10B981" />
-                      <stop offset="60%" stopColor="#39FF14" />
-                      <stop offset="100%" stopColor="#B6FFA1" />
-                    </linearGradient>
-                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#39FF14" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#39FF14" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4 L400,100 L0,100 Z"
-                    fill="url(#areaGrad)"
-                  />
-                  <path
-                    d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4"
-                    fill="none"
-                    stroke="url(#lineGrad)"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    className="animate-draw drop-shadow-[0_0_10px_rgba(57,255,20,0.6)]"
-                  />
-                  <circle cx="400" cy="4" r="4" fill="#39FF14" className="drop-shadow-[0_0_10px_rgba(57,255,20,0.9)]" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <p
-            className="absolute bottom-10 left-14 text-xs text-slate-600 animate-hero xl:left-20"
-            style={{ animationDelay: '620ms' }}
-          >
-            &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
-          </p>
-        </div>
-      </aside>
-
-      {/* Right column — Glass vault */}
-      <section className="relative flex w-full flex-1 items-center justify-center bg-black px-4 py-12 sm:px-8">
-        <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -top-40 right-[-10%] h-[32rem] w-[32rem] rounded-full bg-[#39FF14]/[0.04] blur-[140px]" />
-          <div className="absolute bottom-[-20%] left-[-10%] h-[28rem] w-[28rem] rounded-full bg-emerald-500/[0.04] blur-[140px]" />
-        </div>
-
-        <div
-          className="relative w-full max-w-md animate-hero"
-          style={{ animationDelay: '200ms' }}
-        >
-          {/* Outer neon glow */}
-          <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.03] blur-2xl" />
-          <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_50px_rgba(57,255,20,0.05)]" />
-
-          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_50px_rgba(57,255,20,0.05)] backdrop-blur-2xl transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_80px_rgba(57,255,20,0.12)] sm:p-10">
-            {/* top inner highlight */}
-            <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-
-            <div className="mb-8 text-center lg:hidden">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-[#39FF14]/40">
-                <img
-                  src="/AFFILIATES_LOGO_PNG_(2).png"
-                  alt="Mansão Green"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold tracking-tight text-white">
-                Bem-vindo
-              </h2>
-              <p className="mt-2 text-sm text-slate-400">
-                Insira suas credenciais para acessar sua conta.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <Field
-                id="email"
-                label="E-mail"
-                type="email"
-                value={email}
-                onChange={(v) => {
-                  setEmail(v);
-                  if (error) setError(null);
-                }}
-                placeholder="voce@exemplo.com"
-                icon={<Mail className="h-4 w-4" />}
-                autoComplete="email"
-                required
-              />
-
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="text-xs font-semibold uppercase tracking-widest text-gray-400"
-                  >
-                    Senha
-                  </label>
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-slate-500 transition hover:text-[#39FF14]"
-                  >
-                    Esqueceu a senha?
-                  </button>
-                </div>
-                <div className="group relative">
-                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-[#39FF14]">
-                    <Lock className="h-4 w-4" />
-                  </span>
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (error) setError(null);
-                    }}
-                    placeholder="••••••••"
-                    autoComplete="current-password"
-                    required
-                    className="h-14 w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-12 text-sm text-white placeholder:text-slate-600 outline-none transition-all duration-200 focus:border-[#39FF14] focus:ring-1 focus:ring-[#39FF14]/50 focus:shadow-[0_0_0_4px_rgba(57,255,20,0.08)]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition hover:text-[#39FF14]"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <label className="flex cursor-pointer select-none items-center gap-2.5 text-sm text-slate-400">
-                <span className="relative inline-flex">
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                    className="peer h-4 w-4 appearance-none rounded border border-white/15 bg-black/50 transition checked:border-[#39FF14] checked:bg-[#39FF14]/20 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/40"
-                  />
-                  <svg
-                    viewBox="0 0 16 16"
-                    className="pointer-events-none absolute left-0 top-0 h-4 w-4 scale-0 text-[#39FF14] transition peer-checked:scale-100"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 8.5l3.2 3.2L13 5" />
-                  </svg>
-                </span>
-                Lembrar de mim
-              </label>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative mt-2 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#7CFF58]/40 bg-gradient-to-b from-[#7CFF58] via-[#39FF14] to-[#17B800] text-sm font-bold uppercase tracking-[0.22em] text-black shadow-[0_10px_30px_-8px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:animate-pulse-glow hover:shadow-[0_0_32px_rgba(57,255,20,0.6),0_18px_44px_-10px_rgba(57,255,20,0.65),inset_0_1px_0_rgba(255,255,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39FF14]/60 disabled:cursor-not-allowed disabled:opacity-85 disabled:hover:translate-y-0 disabled:hover:animate-none"
-              >
-                <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.35),transparent_55%)]" />
-                <span
-                  className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-white/40 opacity-0 transition-all duration-700 group-hover:left-[110%] group-hover:opacity-100"
-                />
-                {loading ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-                    <span className="relative">Autenticando...</span>
-                  </>
-                ) : (
-                  <span className="relative inline-flex items-center gap-2">
-                    Entrar no Painel
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-                  </span>
-                )}
-              </button>
-
-              {error && (
-                <p
-                  role="alert"
-                  className="animate-fade-in text-center text-sm font-medium text-rose-400/90"
-                >
-                  {error}
-                </p>
-              )}
-            </form>
-
-            <p className="mt-8 text-center text-sm text-slate-400">
-              Ainda não é parceiro?{' '}
-              <a
-                href="#"
-                className="font-semibold text-[#39FF14] transition hover:text-[#7CFF58] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]"
-              >
-                Solicitar Acesso
-              </a>
-            </p>
-          </div>
-
-          <p className="mt-6 text-center text-xs text-slate-600">
-            Ao entrar, você concorda com nossos Termos e Política de Privacidade.
-          </p>
-        </div>
-      </section>
+      <BrandPanel />
+      <AccessPanel
+        accounts={accounts}
+        email={email}
+        password={password}
+        selectedAccount={selectedAccount}
+        onEmailChange={handleEmailChange}
+        onPasswordChange={handlePasswordChange}
+        remember={remember}
+        setRemember={setRemember}
+        showPassword={showPassword}
+        setShowPassword={setShowPassword}
+        loading={loading}
+        error={error}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }
 
-function Field({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-  placeholder,
-  icon,
-  autoComplete,
-  required,
-}: {
-  id: string;
-  label: string;
-  type: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  icon: React.ReactNode;
-  autoComplete?: string;
-  required?: boolean;
-}) {
+function BrandPanel() {
   return (
-    <div>
-      <label
-        htmlFor={id}
-        className="mb-2 block text-xs font-semibold uppercase tracking-widest text-gray-400"
+    <aside className="relative hidden w-1/2 overflow-hidden lg:flex">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 120% 90% at 50% 10%, #0F4A3A 0%, #093829 28%, #052620 55%, #021612 80%, #000807 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-[0.22]"
+        style={{
+          backgroundImage:
+            'linear-gradient(45deg, rgba(132,255,180,0.10) 1px, transparent 1px), linear-gradient(-45deg, rgba(132,255,180,0.10) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 75% 75% at 50% 45%, black 35%, transparent 80%)',
+          maskImage:
+            'radial-gradient(ellipse 75% 75% at 50% 45%, black 35%, transparent 80%)',
+        }}
+      />
+      <div className="absolute -left-24 top-1/3 h-[30rem] w-[30rem] rounded-full bg-[#39FF14]/[0.08] blur-[150px]" />
+      <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-emerald-500/[0.12] blur-[150px]" />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center px-10 pt-16 pb-24 xl:pt-20">
+        <div
+          className="flex flex-col items-center animate-hero"
+          style={{ animationDelay: '0ms' }}
+        >
+          <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-[26px] bg-black p-2.5 ring-1 ring-[#39FF14]/50 shadow-[0_0_38px_rgba(57,255,20,0.42)]">
+            <img
+              src="/AFFILIATES_LOGO_PNG_(2).png"
+              alt="Mansão Green Affiliates"
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.45em] text-[#7CFF58]/80">
+            Mansão Green Affiliates
+          </p>
+        </div>
+
+        <h1
+          className="mt-12 text-center text-[52px] font-extrabold leading-[1.02] tracking-[-0.035em] animate-hero xl:text-[66px]"
+          style={{ animationDelay: '220ms' }}
+        >
+          <span className="bg-gradient-to-br from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+            O Seu
+          </span>{' '}
+          <span className="relative inline-block bg-gradient-to-r from-[#B6FFA1] via-[#39FF14] to-emerald-400 bg-clip-text pr-1 text-transparent drop-shadow-[0_0_30px_rgba(57,255,20,0.55)]">
+            Império
+          </span>
+          <span className="bg-gradient-to-br from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+            {' '}
+            no iGaming.
+          </span>
+        </h1>
+
+        <p
+          className="mt-6 max-w-xl text-center text-base leading-relaxed text-slate-300/85 animate-hero xl:text-[17px]"
+          style={{ animationDelay: '340ms' }}
+        >
+          Gerencie suas campanhas, acompanhe suas comissões em tempo real e
+          desbloqueie prêmios exclusivos no programa mais premium do mercado.
+        </p>
+
+        <CommissionCard />
+
+        <p
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-xs text-slate-500 animate-hero"
+          style={{ animationDelay: '620ms' }}
+        >
+          &copy; {new Date().getFullYear()} Mansão Green Affiliates. Todos os direitos reservados.
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+function CommissionCard() {
+  return (
+    <div
+      className="group relative mt-12 w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-hero transition-all duration-500 hover:-translate-y-1 hover:border-[#39FF14]/25 hover:shadow-[0_40px_90px_-30px_rgba(0,0,0,0.95),0_0_40px_rgba(57,255,20,0.15)]"
+      style={{ animationDelay: '460ms' }}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(57,255,20,0.14),transparent_55%)]" />
+      <div className="relative flex items-start justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-300/70">
+            Comissão Acumulada
+          </p>
+          <p className="mt-2 text-3xl font-extrabold tracking-tight text-white">
+            R$ 184.320
+          </p>
+          <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#7CFF58]">
+            <ArrowRight className="h-3 w-3 -rotate-45" />
+            +38,2% este mês
+          </p>
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#39FF14]/10 ring-1 ring-[#39FF14]/30">
+          <Sparkles className="h-4 w-4 text-[#7CFF58]" />
+        </div>
+      </div>
+
+      <div className="relative mt-5 h-[92px] w-full">
+        <svg
+          viewBox="0 0 400 100"
+          preserveAspectRatio="none"
+          className="h-full w-full overflow-visible"
+        >
+          <defs>
+            <linearGradient id="lgLine" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#10B981" />
+              <stop offset="60%" stopColor="#39FF14" />
+              <stop offset="100%" stopColor="#B6FFA1" />
+            </linearGradient>
+            <linearGradient id="lgArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#39FF14" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#39FF14" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4 L400,100 L0,100 Z"
+            fill="url(#lgArea)"
+          />
+          <path
+            d="M0,80 C40,72 70,66 110,56 C150,46 180,52 215,38 C250,24 290,30 325,18 C355,8 380,6 400,4"
+            fill="none"
+            stroke="url(#lgLine)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            className="animate-draw drop-shadow-[0_0_10px_rgba(57,255,20,0.65)]"
+          />
+          <circle
+            cx="400"
+            cy="4"
+            r="4"
+            fill="#39FF14"
+            className="drop-shadow-[0_0_10px_rgba(57,255,20,0.9)]"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+type AccessProps = {
+  accounts: DemoAccount[];
+  email: string;
+  password: string;
+  selectedAccount?: DemoAccount;
+  onEmailChange: (v: string) => void;
+  onPasswordChange: (v: string) => void;
+  remember: boolean;
+  setRemember: (v: boolean) => void;
+  showPassword: boolean;
+  setShowPassword: (v: boolean) => void;
+  loading: boolean;
+  error: string | null;
+  onSubmit: (e: FormEvent) => void;
+};
+
+function AccessPanel({
+  accounts,
+  email,
+  password,
+  selectedAccount,
+  onEmailChange,
+  onPasswordChange,
+  remember,
+  setRemember,
+  showPassword,
+  setShowPassword,
+  loading,
+  error,
+  onSubmit,
+}: AccessProps) {
+  const emailOptions = useMemo(
+    () =>
+      accounts.map((a) => ({
+        value: a.email,
+        label: a.email,
+        description: `${a.display_name} · ${ROLE_LABEL[a.role]}`,
+      })),
+    [accounts],
+  );
+
+  const passwordOptions = useMemo(() => {
+    if (!selectedAccount) return [];
+    return [
+      {
+        value: selectedAccount.password,
+        label: '••••••••••',
+        description: `Credencial de ${selectedAccount.display_name}`,
+      },
+    ];
+  }, [selectedAccount]);
+
+  return (
+    <section className="relative flex w-full flex-1 items-center justify-center overflow-hidden bg-black px-4 py-12 sm:px-8">
+      <GreenDust />
+
+      <div
+        className="relative z-10 w-full max-w-md animate-hero"
+        style={{ animationDelay: '200ms' }}
       >
-        {label}
-      </label>
-      <div className="group relative">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition group-focus-within:text-[#39FF14]">
+        <div className="absolute -inset-6 rounded-[2rem] bg-[#39FF14]/[0.04] blur-2xl" />
+        <div className="absolute -inset-2 rounded-[1.75rem] shadow-[0_0_60px_rgba(57,255,20,0.07)]" />
+
+        <div className="relative rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_60px_rgba(57,255,20,0.06)] backdrop-blur-2xl transition-shadow duration-500 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_100px_rgba(57,255,20,0.14)] sm:p-10">
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+          <div className="mb-8 text-center lg:hidden">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-black p-1.5 ring-1 ring-[#39FF14]/40">
+              <img
+                src="/AFFILIATES_LOGO_PNG_(2).png"
+                alt="Mansão Green"
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold tracking-tight text-white">
+              Bem-vindo
+            </h2>
+            <p className="mt-2 text-sm text-slate-400">
+              Insira suas credenciais para acessar sua conta.
+            </p>
+          </div>
+
+          <form onSubmit={onSubmit} className="space-y-5">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-gray-400">
+                E-mail
+              </label>
+              <LoginCombobox
+                value={email}
+                options={emailOptions}
+                placeholder="Selecione um usuário autorizado..."
+                emptyLabel="Nenhum usuário autorizado encontrado."
+                icon={<Mail className="h-4 w-4" />}
+                onChange={onEmailChange}
+              />
+            </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                  Senha
+                </label>
+                <button
+                  type="button"
+                  className="text-xs font-medium text-slate-500 transition hover:text-[#39FF14]"
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
+              <LoginCombobox
+                value={password}
+                options={passwordOptions}
+                placeholder={
+                  selectedAccount
+                    ? 'Escolha a credencial correspondente...'
+                    : 'Selecione um e-mail primeiro'
+                }
+                emptyLabel={
+                  selectedAccount
+                    ? 'Nenhuma credencial disponível.'
+                    : 'Escolha um e-mail para habilitar a senha.'
+                }
+                icon={<KeyRound className="h-4 w-4" />}
+                disabled={!selectedAccount}
+                onChange={onPasswordChange}
+                obfuscate={!showPassword}
+                trailing={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition hover:text-[#39FF14]"
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                }
+              />
+            </div>
+
+            <label className="flex cursor-pointer select-none items-center gap-2.5 text-sm text-slate-400">
+              <span className="relative inline-flex">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="peer h-4 w-4 appearance-none rounded border border-white/15 bg-black/50 transition checked:border-[#39FF14] checked:bg-[#39FF14]/20 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/40"
+                />
+                <svg
+                  viewBox="0 0 16 16"
+                  className="pointer-events-none absolute left-0 top-0 h-4 w-4 scale-0 text-[#39FF14] transition peer-checked:scale-100"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 8.5l3.2 3.2L13 5" />
+                </svg>
+              </span>
+              Lembrar de mim
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative mt-2 flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#7CFF58]/40 bg-gradient-to-b from-[#7CFF58] via-[#39FF14] to-[#17B800] text-sm font-bold uppercase tracking-[0.22em] text-black shadow-[0_10px_30px_-8px_rgba(57,255,20,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_32px_rgba(57,255,20,0.6),0_18px_44px_-10px_rgba(57,255,20,0.65),inset_0_1px_0_rgba(255,255,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39FF14]/60 disabled:cursor-not-allowed disabled:opacity-85 disabled:hover:translate-y-0"
+            >
+              <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.35),transparent_55%)]" />
+              <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-white/40 opacity-0 transition-all duration-700 group-hover:left-[110%] group-hover:opacity-100" />
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+                  <span className="relative">Autenticando...</span>
+                </>
+              ) : (
+                <span className="relative inline-flex items-center gap-2">
+                  Entrar no Painel
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                </span>
+              )}
+            </button>
+
+            {error && (
+              <p
+                role="alert"
+                className="animate-fade-in text-center text-sm font-medium text-rose-400/90"
+              >
+                {error}
+              </p>
+            )}
+          </form>
+
+          <p className="mt-8 text-center text-sm text-slate-400">
+            Ainda não é parceiro?{' '}
+            <a
+              href="#"
+              className="font-semibold text-[#39FF14] transition hover:text-[#7CFF58] hover:drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]"
+            >
+              Solicitar Acesso
+            </a>
+          </p>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-slate-600">
+          Ao entrar, você concorda com nossos Termos e Política de Privacidade.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+type ComboOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
+
+function LoginCombobox({
+  value,
+  options,
+  placeholder,
+  emptyLabel,
+  icon,
+  onChange,
+  disabled = false,
+  obfuscate = false,
+  trailing,
+}: {
+  value: string;
+  options: ComboOption[];
+  placeholder: string;
+  emptyLabel: string;
+  icon: React.ReactNode;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  obfuscate?: boolean;
+  trailing?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState('');
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selected = useMemo(
+    () => options.find((o) => o.value === value),
+    [options, value],
+  );
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    if (!open) setTerm('');
+  }, [open]);
+
+  const normalized = term.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      options.filter((o) =>
+        normalized
+          ? o.label.toLowerCase().includes(normalized) ||
+            (o.description?.toLowerCase().includes(normalized) ?? false)
+          : true,
+      ),
+    [options, normalized],
+  );
+
+  const handleSelect = (val: string) => {
+    onChange(val);
+    setOpen(false);
+    setTerm('');
+  };
+
+  const displayValue = selected
+    ? obfuscate
+      ? '•'.repeat(Math.min(selected.value.length, 12))
+      : selected.label
+    : '';
+
+  return (
+    <div ref={rootRef} className="relative">
+      <div
+        className={`flex h-14 items-center gap-2 rounded-xl border bg-black/50 px-3 transition ${
+          open
+            ? 'border-[#39FF14] shadow-[0_0_0_4px_rgba(57,255,20,0.10)]'
+            : 'border-white/10'
+        } ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-text'}`}
+        onClick={() => {
+          if (disabled) return;
+          setOpen(true);
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }}
+      >
+        <span
+          className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${
+            open ? 'text-[#39FF14]' : 'text-slate-500'
+          }`}
+        >
           {icon}
         </span>
         <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          ref={inputRef}
+          type="text"
+          value={open ? term : displayValue}
+          onFocus={() => !disabled && setOpen(true)}
+          onChange={(e) => {
+            setTerm(e.target.value);
+            if (!open) setOpen(true);
+          }}
           placeholder={placeholder}
-          autoComplete={autoComplete}
-          required={required}
-          className="h-14 w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all duration-200 focus:border-[#39FF14] focus:ring-1 focus:ring-[#39FF14]/50 focus:shadow-[0_0_0_4px_rgba(57,255,20,0.08)]"
+          disabled={disabled}
+          readOnly={!open}
+          className="flex-1 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-500 disabled:cursor-not-allowed"
         />
+        {value && !open && !disabled && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange('');
+            }}
+            aria-label="Limpar"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-slate-500 transition hover:bg-white/5 hover:text-white"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {trailing}
+        {open ? (
+          <Search className="h-4 w-4 text-[#39FF14]" />
+        ) : (
+          <ChevronDown
+            className={`h-4 w-4 transition ${disabled ? 'text-slate-700' : 'text-slate-500'}`}
+          />
+        )}
       </div>
+
+      {open && !disabled && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-[#0B0E0C]/95 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+          {filtered.length === 0 ? (
+            <p className="px-4 py-6 text-center text-sm text-slate-400">{emptyLabel}</p>
+          ) : (
+            <ul>
+              {filtered.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
+                  <li key={opt.value}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(opt.value)}
+                      className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-[#39FF14]/10 hover:text-[#39FF14] ${
+                        isSelected ? 'bg-[#39FF14]/10 text-[#39FF14]' : 'text-slate-200'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold">
+                          {obfuscate ? '•'.repeat(Math.min(opt.value.length, 12)) : opt.label}
+                        </p>
+                        {opt.description && (
+                          <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                            {opt.description}
+                          </p>
+                        )}
+                      </div>
+                      {isSelected && <Check className="h-4 w-4 flex-shrink-0" />}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GreenDust() {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 42 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        size: 1 + Math.random() * 2.4,
+        delay: Math.random() * 8,
+        duration: 9 + Math.random() * 10,
+        blur: Math.random() > 0.55 ? 'blur(0.5px)' : 'blur(1.2px)',
+        opacity: 0.15 + Math.random() * 0.55,
+      })),
+    [],
+  );
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -top-40 right-[-12%] h-[36rem] w-[36rem] rounded-full bg-[#39FF14]/[0.05] blur-[150px]" />
+      <div className="absolute bottom-[-20%] left-[-15%] h-[30rem] w-[30rem] rounded-full bg-emerald-500/[0.05] blur-[150px]" />
+
+      {particles.map((p) => (
+        <span
+          key={p.id}
+          className="absolute rounded-full bg-[#39FF14] animate-dust"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            opacity: p.opacity,
+            filter: p.blur,
+            boxShadow: '0 0 10px rgba(57,255,20,0.7)',
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
     </div>
   );
 }
