@@ -35,8 +35,6 @@ import AgencySettingsPage from './components/agency/AgencySettingsPage';
 import ManagerDashboardPage from './components/manager/ManagerDashboardPage';
 import ManagerAffiliatesPage from './components/manager/ManagerAffiliatesPage';
 import ManagerSettingsPage from './components/manager/ManagerSettingsPage';
-import SubOverviewPage from './components/sub/SubOverviewPage';
-import SubReportsPage from './components/sub/SubReportsPage';
 import SubSettingsPage from './components/sub/SubSettingsPage';
 import { useUser } from './contexts/UserContext';
 import { supabase } from './lib/supabase';
@@ -411,9 +409,9 @@ function App() {
         return <ManagerSettingsPage />;
 
       case 'sub-overview':
-        return <SubOverviewPage />;
+        return renderDashboard();
       case 'sub-reports':
-        return <SubReportsPage />;
+        return <ReportsPage />;
       case 'sub-settings':
         return <SubSettingsPage />;
 

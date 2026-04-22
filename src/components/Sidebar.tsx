@@ -15,7 +15,6 @@ import {
   Cog,
   Network,
   Briefcase,
-  PieChart,
 } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 import { useUser, type Role } from '../contexts/UserContext';
@@ -63,7 +62,7 @@ const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: 'settings', label: 'Configurações', icon: Settings },
   ],
   SUB_AFFILIATE: [
-    { key: 'sub-overview', label: 'Visão Resumida', icon: PieChart },
+    { key: 'sub-overview', label: 'Visão Geral', icon: LayoutDashboard },
     { key: 'sub-reports', label: 'Relatórios', icon: BarChart3 },
     { key: 'sub-settings', label: 'Configurações', icon: Settings },
   ],
