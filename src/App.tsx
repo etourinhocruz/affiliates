@@ -28,7 +28,6 @@ import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
 import UsersManagementPage from './components/admin/UsersManagementPage';
 import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
 import DealsManagementPage from './components/admin/DealsManagementPage';
-import DataUploadPage from './components/admin/DataUploadPage';
 import CampaignAssignmentsPage from './components/admin/CampaignAssignmentsPage';
 import AgencyOverviewPage from './components/agency/AgencyOverviewPage';
 import AgencyNetworkPage from './components/agency/AgencyNetworkPage';
@@ -377,8 +376,6 @@ function App() {
         return <DealsManagementPage />;
       case 'admin-campaign-assignments':
         return <CampaignAssignmentsPage />;
-      case 'admin-data-upload':
-        return <DataUploadPage />;
       case 'admin-audit':
         return (
           <PlaceholderPage
