@@ -30,13 +30,7 @@ type DemoAccount = {
 };
 
 const FALLBACK_ACCOUNTS: DemoAccount[] = [
-  { email: 'pierre@affiliates.com', password: 'Pierre@2026', display_name: 'Pierre Castro', role: 'AFFILIATE' },
-  { email: 'rodrigo.alves@gmail.com', password: 'Rodrigo@2026', display_name: 'Rodrigo Alves', role: 'AFFILIATE' },
-  { email: 'marina.q@tuboreomedia.com', password: 'Marina@2026', display_name: 'Marina Queiroz', role: 'AFFILIATE' },
-  { email: 'fernanda@tuboreomedia.com', password: 'Agency@2026', display_name: 'Fernanda Arruda', role: 'AGENCY' },
-  { email: 'marcus.manager@mansaogreen.com', password: 'Manager@2026', display_name: 'Marcus Trader', role: 'MANAGER' },
-  { email: 'carlos.s@gmail.com', password: 'Sub@2026', display_name: 'Carlos Simões', role: 'SUB_AFFILIATE' },
-  { email: 'admin@mansaogreen.com', password: 'Admin@2026', display_name: 'Diretor Geral', role: 'SUPER_ADMIN' },
+  { email: 'pierre@mansaogreen.com', password: 'Pierre@2026', display_name: 'Pierre Aguiar', role: 'SUPER_ADMIN' },
 ];
 
 const ROLE_LABEL: Record<Role, string> = {
