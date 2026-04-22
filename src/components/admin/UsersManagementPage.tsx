@@ -259,8 +259,9 @@ export default function UsersManagementPage() {
                   </td>
                 </tr>
               )}
-              {filtered.map((u) => {
+              {filtered.map((u, index) => {
                 const blocked = u.status === 'blocked';
+                const openUp = filtered.length > 2 && index >= filtered.length - 2;
                 return (
                   <tr
                     key={u.id}
@@ -320,6 +321,7 @@ export default function UsersManagementPage() {
                         onBlock={() => handleBlock(u)}
                         onDelete={() => handleDelete(u)}
                         blocked={blocked}
+                        openUp={openUp}
                       />
                     </td>
                   </tr>
@@ -462,6 +464,7 @@ function ActionMenu({
   onBlock,
   onDelete,
   blocked,
+  openUp = false,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -470,6 +473,7 @@ function ActionMenu({
   onBlock: () => void;
   onDelete: () => void;
   blocked: boolean;
+  openUp?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -492,7 +496,11 @@ function ActionMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#13141A]/95">
+        <div
+          className={`absolute right-0 z-50 w-60 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#13141A]/95 ${
+            openUp ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
+        >
           <MenuButton icon={<Pencil className="h-4 w-4" />} onClick={onEdit}>
             Editar Usuário
           </MenuButton>
