@@ -29,6 +29,7 @@ import UsersManagementPage from './components/admin/UsersManagementPage';
 import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
 import DealsManagementPage from './components/admin/DealsManagementPage';
 import CampaignAssignmentsPage from './components/admin/CampaignAssignmentsPage';
+import DataImportPage from './components/admin/DataImportPage';
 import AgencyOverviewPage from './components/agency/AgencyOverviewPage';
 import AgencyNetworkPage from './components/agency/AgencyNetworkPage';
 import AgencyReportsPage from './components/agency/AgencyReportsPage';
@@ -163,7 +164,7 @@ function App() {
         .from('daily_metrics')
         .select('*')
         .order('date', { ascending: true });
-      if (m && m.length) setMetrics(m as DailyMetric[]);
+      if (m) setMetrics(m as DailyMetric[]);
     })();
   }, []);
 
@@ -173,7 +174,7 @@ function App() {
         .from('dashboard_segments')
         .select('*')
         .order('sort_order', { ascending: true });
-      if (s && s.length) setSegments(s as DashboardSegment[]);
+      if (s) setSegments(s as DashboardSegment[]);
     })();
   }, []);
 
@@ -188,6 +189,22 @@ function App() {
   );
 
   const funnel = useMemo(() => {
+    if (!segment) {
+      return {
+        cadastros: 0,
+        cadastrosDelta: 0,
+        ftd: 0,
+        ftdConv: 0,
+        qftd: 0,
+        qftdConv: 0,
+        depositoTotal: 0,
+        valuePlayer: 0,
+        netRevenue: 0,
+        revLiquido: 0,
+        cpaCommission: 0,
+        revCommission: 0,
+      };
+    }
     const cadastrosDelta =
       segment.cadastros_yesterday > 0
         ? ((segment.cadastros - segment.cadastros_yesterday) /
@@ -212,7 +229,7 @@ function App() {
   }, [segment]);
 
   const segmentScale = useMemo(() => {
-    if (!allSegment || !allSegment.cadastros) return 1;
+    if (!segment || !allSegment || !allSegment.cadastros) return 1;
     return segment.cadastros / allSegment.cadastros;
   }, [segment, allSegment]);
 
@@ -252,7 +269,7 @@ function App() {
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Acompanhe suas métricas de afiliação em tempo real.
-          {segment.house_key !== 'all' && (
+          {segment && segment.house_key !== 'all' && (
             <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-neon-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neon-600 ring-1 ring-neon-400/30 dark:text-neon-300">
               {segment.label}
             </span>
@@ -343,7 +360,7 @@ function App() {
           data={metrics}
           segmentKey={selectedHouse}
           segmentScale={segmentScale}
-          segmentLabel={segment.label}
+          segmentLabel={segment?.label ?? 'Geral'}
         />
       </section>
     </>
@@ -376,6 +393,8 @@ function App() {
         return <DealsManagementPage />;
       case 'admin-campaign-assignments':
         return <CampaignAssignmentsPage />;
+      case 'admin-import':
+        return <DataImportPage />;
       case 'admin-audit':
         return (
           <PlaceholderPage
