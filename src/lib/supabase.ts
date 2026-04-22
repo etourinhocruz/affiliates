@@ -5,6 +5,29 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+type AdminWriteBody =
+  | { table: 'agencies'; action: 'insert'; payload: Record<string, unknown> }
+  | { table: 'agencies'; action: 'update'; id: string; patch: Record<string, unknown> }
+  | { table: 'admin_users'; action: 'update'; id: string; patch: Record<string, unknown> }
+  | { table: 'admin_users'; action: 'delete'; id: string }
+  | { table: 'admin_deals'; action: 'insert'; payload: Record<string, unknown> }
+  | { table: 'admin_deals'; action: 'update'; id: string; patch: Record<string, unknown> }
+  | { table: 'imported_metrics'; action: 'batch_insert'; rows: Record<string, unknown>[] };
+
+export async function adminWrite<T = unknown>(body: AdminWriteBody): Promise<T | null> {
+  const res = await fetch(`${supabaseUrl}/functions/v1/admin-write`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error ?? 'admin-write failed');
+  return (json?.data as T) ?? null;
+}
+
 export type DailyMetric = {
   id: string;
   date: string;
