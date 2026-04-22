@@ -1,14 +1,17 @@
 import { useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import {
+  Check,
   ChevronDown,
   ClipboardList,
   Database,
   FileSpreadsheet,
+  Loader2,
   Trash2,
   UploadCloud,
   Zap,
 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 type HouseKey = 'superbet' | 'betmgm' | 'esportivabet' | 'betfair' | 'novibet';
 
@@ -44,12 +47,81 @@ export default function DataUploadPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [persisting, setPersisting] = useState(false);
+  const [persistResult, setPersistResult] = useState<{
+    inserted: number;
+    updated: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const houseLabel = useMemo(
     () => HOUSES.find((h) => h.key === house)?.label ?? '',
     [house],
   );
+
+  const persistRows = async (parsed: CampaignRow[], betHouse: HouseKey) => {
+    const unique = new Map<string, CampaignRow>();
+    for (const r of parsed) {
+      const acid = r.acid.trim();
+      if (!acid) continue;
+      const key = `${betHouse}::${acid}`;
+      const prev = unique.get(key);
+      const ftd = Number(r.ftd || '0') || 0;
+      const revenue = Number(String(r.revenue || '0').replace(',', '.')) || 0;
+      if (!prev) {
+        unique.set(key, { ...r, acid, ftd: String(ftd), revenue: String(revenue) });
+      } else {
+        unique.set(key, {
+          ...prev,
+          siteId: prev.siteId || r.siteId,
+          siteName: prev.siteName || r.siteName,
+          ftd: String((Number(prev.ftd) || 0) + ftd),
+          revenue: String((Number(prev.revenue) || 0) + revenue),
+        });
+      }
+    }
+    const list = Array.from(unique.values());
+    if (list.length === 0) {
+      setPersistResult({ inserted: 0, updated: 0 });
+      return;
+    }
+
+    setPersisting(true);
+    const acids = list.map((r) => r.acid);
+    const { data: existing } = await supabase
+      .from('campaign_assignments')
+      .select('acid')
+      .eq('bet_house', betHouse)
+      .in('acid', acids);
+    const existingSet = new Set((existing || []).map((e) => String(e.acid)));
+
+    const nowIso = new Date().toISOString();
+    const payload = list.map((r) => ({
+      bet_house: betHouse,
+      site_id: r.siteId,
+      site_name: r.siteName,
+      acid: r.acid,
+      ftd: Number(r.ftd) || 0,
+      revenue: Number(r.revenue) || 0,
+      last_seen_at: nowIso,
+      updated_at: nowIso,
+    }));
+
+    const { error } = await supabase
+      .from('campaign_assignments')
+      .upsert(payload, { onConflict: 'bet_house,acid' });
+
+    setPersisting(false);
+
+    if (error) {
+      setParseError('Não foi possível salvar as campanhas no banco.');
+      return;
+    }
+
+    const inserted = payload.filter((p) => !existingSet.has(p.acid)).length;
+    const updated = payload.length - inserted;
+    setPersistResult({ inserted, updated });
+  };
 
   const handleFile = (file: File) => {
     if (!file) return;
@@ -62,6 +134,7 @@ export default function DataUploadPage() {
     }
     setFileName(file.name);
     setParseError(null);
+    setPersistResult(null);
 
     Papa.parse<Record<string, string>>(file, {
       header: true,
@@ -90,6 +163,7 @@ export default function DataUploadPage() {
               r.siteId || r.siteName || r.acid || r.ftd || r.revenue,
           );
         setRows(parsed);
+        void persistRows(parsed, house);
       },
       error: () => {
         setParseError('Não foi possível ler o arquivo CSV.');
@@ -108,6 +182,7 @@ export default function DataUploadPage() {
     setRows([]);
     setFileName(null);
     setParseError(null);
+    setPersistResult(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -221,19 +296,41 @@ export default function DataUploadPage() {
         </div>
       </section>
 
+      {(persisting || persistResult) && (
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-neon-400/30 bg-neon-400/5 px-4 py-3 text-sm text-slate-200 backdrop-blur-xl">
+          {persisting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin text-neon-300" />
+              <span>Ingerindo campanhas no banco...</span>
+            </>
+          ) : persistResult ? (
+            <>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neon-400/20 text-neon-300">
+                <Check className="h-3.5 w-3.5" />
+              </span>
+              <span>
+                Ingestão concluída: <span className="font-bold text-neon-300">{persistResult.inserted}</span>{' '}
+                nova(s) e <span className="font-bold text-neon-300">{persistResult.updated}</span> atualizada(s).
+                A atribuição é feita na aba <span className="font-semibold text-white">Atribuição de Campanhas</span>.
+              </span>
+            </>
+          ) : null}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6">
         <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#1E1E24]/80 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] backdrop-blur-xl">
           <div className="flex flex-col gap-2 border-b border-white/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-base font-semibold text-white">
-                Campanhas Lidas / Para Atribuição
+                Pré-visualização das Campanhas Ingeridas
               </h3>
               <p className="mt-0.5 text-xs text-slate-400">
                 Casa selecionada: <span className="text-neon-300">{houseLabel}</span>
                 {rows.length > 0 && (
                   <>
                     {' · '}
-                    <span>{rows.length} linhas importadas</span>
+                    <span>{rows.length} linhas lidas</span>
                   </>
                 )}
               </p>
@@ -248,14 +345,13 @@ export default function DataUploadPage() {
                   <th className="px-3 py-3 text-left font-semibold">Site Name</th>
                   <th className="px-3 py-3 text-left font-semibold">ACID (Tracker)</th>
                   <th className="px-3 py-3 text-right font-semibold">FTD</th>
-                  <th className="px-3 py-3 text-right font-semibold">Receita</th>
-                  <th className="px-5 py-3 text-right font-semibold">Ação</th>
+                  <th className="px-5 py-3 text-right font-semibold">Receita</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.length === 0 ? (
+                {(rows || []).length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-16 text-center">
+                    <td colSpan={5} className="px-5 py-16 text-center">
                       <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-400 ring-1 ring-white/10">
                           <FileSpreadsheet className="h-6 w-6" />
@@ -264,8 +360,7 @@ export default function DataUploadPage() {
                           Nenhum dado encontrado
                         </p>
                         <p className="text-xs text-slate-400">
-                          Envie um arquivo .csv para visualizar as campanhas para
-                          atribuição.
+                          Envie um arquivo .csv para ingerir as campanhas automaticamente no banco.
                         </p>
                       </div>
                     </td>
@@ -273,7 +368,7 @@ export default function DataUploadPage() {
                 ) : (
                   rows.map((r, i) => (
                     <tr
-                      key={`${r.siteId}-${i}`}
+                      key={`${r.acid || r.siteId}-${i}`}
                       className="border-b border-white/5 text-slate-200 transition hover:bg-white/5"
                     >
                       <td className="whitespace-nowrap px-5 py-3 text-left font-semibold text-white">
@@ -288,13 +383,8 @@ export default function DataUploadPage() {
                       <td className="whitespace-nowrap px-3 py-3 text-right tabular-nums">
                         {r.ftd || '0'}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 text-right tabular-nums font-bold text-neon-300">
+                      <td className="whitespace-nowrap px-5 py-3 text-right tabular-nums font-bold text-neon-300">
                         {r.revenue || '0'}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-right">
-                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-neon-400/40 bg-neon-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-neon-300 transition hover:border-neon-400/60 hover:bg-neon-400/20 hover:text-white">
-                          Atribuir/Revisar
-                        </button>
                       </td>
                     </tr>
                   ))

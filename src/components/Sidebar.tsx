@@ -16,6 +16,7 @@ import {
   Network,
   Briefcase,
   UploadCloud,
+  Target,
 } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 import { useUser, type Role } from '../contexts/UserContext';
@@ -39,6 +40,7 @@ const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: 'admin-users', label: 'Gestão de Usuários', icon: UserCog },
     { key: 'admin-agencies', label: 'Gestão de Agências', icon: Building2 },
     { key: 'admin-deals', label: 'Gestão de Acordos', icon: Handshake },
+    { key: 'admin-campaign-assignments', label: 'Atribuição de Campanhas', icon: Target },
     { key: 'admin-data-upload', label: 'Upload de Dados', icon: UploadCloud },
     { key: 'admin-audit', label: 'Auditoria', icon: FileClock },
     { key: 'admin-settings', label: 'Configurações Globais', icon: Cog },

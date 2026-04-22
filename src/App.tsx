@@ -29,6 +29,7 @@ import UsersManagementPage from './components/admin/UsersManagementPage';
 import AgenciesManagementPage from './components/admin/AgenciesManagementPage';
 import DealsManagementPage from './components/admin/DealsManagementPage';
 import DataUploadPage from './components/admin/DataUploadPage';
+import CampaignAssignmentsPage from './components/admin/CampaignAssignmentsPage';
 import AgencyOverviewPage from './components/agency/AgencyOverviewPage';
 import AgencyNetworkPage from './components/agency/AgencyNetworkPage';
 import AgencyReportsPage from './components/agency/AgencyReportsPage';
@@ -374,6 +375,8 @@ function App() {
         return <AgenciesManagementPage />;
       case 'admin-deals':
         return <DealsManagementPage />;
+      case 'admin-campaign-assignments':
+        return <CampaignAssignmentsPage />;
       case 'admin-data-upload':
         return <DataUploadPage />;
       case 'admin-audit':
