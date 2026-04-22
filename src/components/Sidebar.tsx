@@ -35,7 +35,7 @@ export type MenuItem = {
 
 const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   SUPER_ADMIN: [
-    { key: 'admin-dashboard', label: 'Dashboard Admin', icon: Shield },
+    { key: 'admin-dashboard', label: 'Visão Geral', icon: Shield },
     { key: 'admin-users', label: 'Gestão de Usuários', icon: UserCog },
     { key: 'admin-agencies', label: 'Gestão de Agências', icon: Building2 },
     { key: 'admin-deals', label: 'Gestão de Acordos', icon: Handshake },
