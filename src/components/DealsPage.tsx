@@ -22,57 +22,43 @@ import { useUser } from '../contexts/UserContext';
 type BadgeTone = 'neon' | 'amber' | 'sky' | 'rose' | 'teal';
 
 type BrandConfig = {
-  bg: string;
   badges: { label: string; icon: typeof Flame; tone: BadgeTone }[];
 };
 
 const brandConfig: Record<string, BrandConfig> = {
   SUPERBET: {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(220,38,38,0.22),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Top Conversão', icon: Flame, tone: 'rose' },
       { label: 'Gamificação', icon: Gamepad2, tone: 'neon' },
     ],
   },
   BETFAIR: {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(255,184,12,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Clássico Premium', icon: Trophy, tone: 'amber' },
       { label: 'Alta Retenção', icon: TrendingUp, tone: 'neon' },
     ],
   },
   NOVIBET: {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(16,185,129,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'CPA Progressivo', icon: Zap, tone: 'neon' },
       { label: 'Alto Payout', icon: Sparkles, tone: 'teal' },
     ],
   },
   'BET MGM': {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(250,204,21,0.18),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Marca Global', icon: Trophy, tone: 'amber' },
       { label: 'Cassino Ao Vivo', icon: Sparkles, tone: 'sky' },
     ],
   },
   'ESPORTIVA BET': {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(59,130,246,0.2),rgba(30,30,36,0)_65%)]',
     badges: [
       { label: 'Mobile First', icon: Zap, tone: 'sky' },
       { label: 'Alta FTD', icon: Flame, tone: 'rose' },
     ],
   },
-  KTO: {
-    bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(57,255,20,0.18),rgba(30,30,36,0)_65%)]',
-    badges: [
-      { label: 'Novo no Programa', icon: Sparkles, tone: 'neon' },
-      { label: 'Comissão Elevada', icon: TrendingUp, tone: 'amber' },
-    ],
-  },
 };
 
 const defaultBrand: BrandConfig = {
-  bg: 'bg-[radial-gradient(circle_at_50%_45%,rgba(57,255,20,0.12),rgba(30,30,36,0)_65%)]',
   badges: [{ label: 'Parceiro Oficial', icon: Sparkles, tone: 'neon' }],
 };
 
@@ -168,23 +154,6 @@ const fallbackDeals: Deal[] = [
     rev_value: '25',
     deposito_min: '30,00',
     aposta_min: '30,00',
-    additional_info: null,
-  },
-  {
-    id: 'kto',
-    name: 'KTO',
-    banner: '',
-    logo: 'KT',
-    baseline: '',
-    cpa: '',
-    revshare: '',
-    sort_order: 6,
-    logo_url: '',
-    banner_color: '',
-    cpa_value: '220,00',
-    rev_value: '30',
-    deposito_min: '20,00',
-    aposta_min: '10,00',
     additional_info: null,
   },
 ];
@@ -334,7 +303,7 @@ function DealCard({
     <article
       className={`relative overflow-hidden rounded-3xl border border-white/5 bg-[#1E1E24]/90 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl ${enterClass}`}
     >
-      <div className={`relative flex h-56 items-center justify-center overflow-hidden ${brand.bg} sm:h-64`}>
+      <div className="relative flex h-56 items-center justify-center overflow-hidden sm:h-64">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.06),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
