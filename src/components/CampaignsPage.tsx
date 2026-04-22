@@ -52,62 +52,7 @@ const STATUS_TABS: { key: 'all' | CampaignStatus; label: string }[] = [
   { key: 'Desativada', label: 'Desativadas' },
 ];
 
-const mockCampaigns: Campaign[] = [
-  {
-    id: 'c-001',
-    name: 'TikTok Ads 01',
-    house: 'Superbet',
-    status: 'Ativa',
-    trackingLink: 'https://go.superbet.com/?btag=mansaogreen-tkt01',
-    clicks: 4820,
-    ftds: 148,
-  },
-  {
-    id: 'c-002',
-    name: 'Instagram Bio',
-    house: 'BetMGM',
-    status: 'Ativa',
-    trackingLink: 'https://track.betmgm.com/?ref=mansaogreen-igbio',
-    clicks: 3210,
-    ftds: 96,
-  },
-  {
-    id: 'c-003',
-    name: 'Telegram VIP',
-    house: 'Novibet',
-    status: 'Pendente',
-    trackingLink: '',
-    clicks: 0,
-    ftds: 0,
-  },
-  {
-    id: 'c-004',
-    name: 'YouTube Review Canal Alpha',
-    house: 'Betfair',
-    status: 'Ativa',
-    trackingLink: 'https://promo.betfair.com/aff?c=mgreen-ytalpha',
-    clicks: 1840,
-    ftds: 58,
-  },
-  {
-    id: 'c-005',
-    name: 'Facebook Ads Reels',
-    house: 'EsportivaBet',
-    status: 'Pendente',
-    trackingLink: '',
-    clicks: 0,
-    ftds: 0,
-  },
-  {
-    id: 'c-006',
-    name: 'Blog SEO Apostas BR',
-    house: 'Superbet',
-    status: 'Desativada',
-    trackingLink: '',
-    clicks: 920,
-    ftds: 12,
-  },
-];
+const mockCampaigns: Campaign[] = [];
 
 type FormState = { house: string; name: string };
 
@@ -308,11 +253,10 @@ export default function CampaignsPage() {
                         <Megaphone className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-semibold text-white">
-                        Nenhuma campanha encontrada
+                        Nenhum dado encontrado
                       </p>
                       <p className="text-xs text-slate-400">
-                        Ajuste os filtros ou solicite uma nova campanha para começar a
-                        rastrear seu tráfego.
+                        Solicite uma nova campanha para começar a rastrear seu tráfego.
                       </p>
                     </div>
                   </td>

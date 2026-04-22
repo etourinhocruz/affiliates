@@ -51,7 +51,7 @@ export default function SuperAdminDashboard() {
     [selectedHouse],
   );
 
-  const platformMargin = 63.8;
+  const platformMargin = 0;
 
   return (
     <div className="pb-10 text-slate-900 animate-rise dark:text-slate-100">
@@ -242,57 +242,57 @@ const OVERVIEW_METRICS: OverviewMetric[] = [
     key: 'registro',
     label: 'Registro',
     icon: <UserPlus className="h-5 w-5" />,
-    affiliate: '48.912',
-    agency: '20.723',
-    total: '69.635',
+    affiliate: '0',
+    agency: '0',
+    total: '0',
   },
   {
     key: 'ftd',
     label: 'FTD',
     icon: <Target className="h-5 w-5" />,
-    affiliate: '12.486',
-    agency: '5.812',
-    total: '18.298',
+    affiliate: '0',
+    agency: '0',
+    total: '0',
   },
   {
     key: 'qftd',
     label: 'QFTD',
     icon: <Gauge className="h-5 w-5" />,
-    affiliate: '9.172',
-    agency: '4.240',
-    total: '13.412',
+    affiliate: '0',
+    agency: '0',
+    total: '0',
   },
   {
     key: 'deposito',
     label: 'Depósito',
     icon: <Wallet className="h-5 w-5" />,
-    affiliate: 'R$ 28.412.560,00',
-    agency: 'R$ 12.980.140,00',
-    total: 'R$ 41.392.700,00',
+    affiliate: 'R$ 0,00',
+    agency: 'R$ 0,00',
+    total: 'R$ 0,00',
   },
   {
     key: 'rev',
     label: 'REV',
     icon: <TrendingUp className="h-5 w-5" />,
-    affiliate: 'R$ 4.128.920,50',
-    agency: 'R$ 2.450.318,80',
-    total: 'R$ 6.579.239,30',
+    affiliate: 'R$ 0,00',
+    agency: 'R$ 0,00',
+    total: 'R$ 0,00',
   },
   {
     key: 'cpa',
     label: 'CPA',
     icon: <DollarSign className="h-5 w-5" />,
-    affiliate: 'R$ 32.184.660,22',
-    agency: 'R$ 19.929.319,56',
-    total: 'R$ 52.113.979,78',
+    affiliate: 'R$ 0,00',
+    agency: 'R$ 0,00',
+    total: 'R$ 0,00',
   },
   {
     key: 'rev_cpa',
     label: 'REV + CPA',
     icon: <Handshake className="h-5 w-5" />,
-    affiliate: 'R$ 36.313.580,72',
-    agency: 'R$ 22.379.638,36',
-    total: 'R$ 58.693.219,08',
+    affiliate: 'R$ 0,00',
+    agency: 'R$ 0,00',
+    total: 'R$ 0,00',
   },
 ];
 
