@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Ban,
   Check,
+  ChevronDown,
   Eye,
   Filter,
   Lock,
@@ -12,6 +13,7 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Trash2,
   UserPlus,
   X,
 } from 'lucide-react';
@@ -48,6 +50,20 @@ const ROLE_STYLE: Record<Role, string> = {
   AFFILIATE: 'bg-neon-400/10 text-neon-700 ring-neon-400/30 dark:text-neon-300',
   SUB_AFFILIATE: 'bg-slate-500/10 text-slate-700 ring-slate-400/30 dark:text-slate-300',
 };
+
+const AGENCY_OPTIONS: string[] = [
+  'Agência Tubarões Media',
+  'Agência HighRoller BR',
+  'Agência Sports Hub',
+  'Equipe VIP BR',
+  'Agência Prime Brasil',
+  'Agência Odds Club',
+];
+
+const NO_AGENCY_VALUE = 'Nenhuma';
+const NO_AGENCY_LABEL = 'Nenhuma (Direto com a Plataforma)';
+
+const ROLES_WITH_AGENCY: Role[] = ['MANAGER', 'AFFILIATE', 'SUB_AFFILIATE'];
 
 const FILTER_OPTIONS: { key: 'ALL' | Role; label: string }[] = [
   { key: 'ALL', label: 'Todos os Papéis' },
@@ -147,6 +163,17 @@ export default function UsersManagementPage() {
   const handleEdit = (u: AdminUser) => {
     setEditing(u);
     setOpenMenu(null);
+  };
+
+  const handleDelete = async (u: AdminUser) => {
+    setOpenMenu(null);
+    const confirmed = window.confirm(
+      'Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita.',
+    );
+    if (!confirmed) return;
+    setUsers((list) => list.filter((x) => x.id !== u.id));
+    setToast(`Usuário ${u.name} excluído permanentemente.`);
+    await supabase.from('admin_users').delete().eq('id', u.id);
   };
 
   return (
@@ -291,6 +318,7 @@ export default function UsersManagementPage() {
                         onEdit={() => handleEdit(u)}
                         onImpersonate={() => handleImpersonate(u)}
                         onBlock={() => handleBlock(u)}
+                        onDelete={() => handleDelete(u)}
                         blocked={blocked}
                       />
                     </td>
@@ -432,6 +460,7 @@ function ActionMenu({
   onEdit,
   onImpersonate,
   onBlock,
+  onDelete,
   blocked,
 }: {
   open: boolean;
@@ -439,6 +468,7 @@ function ActionMenu({
   onEdit: () => void;
   onImpersonate: () => void;
   onBlock: () => void;
+  onDelete: () => void;
   blocked: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -482,6 +512,13 @@ function ActionMenu({
             >
               {blocked ? 'Reativar Acesso' : 'Bloquear Acesso'}
             </MenuButton>
+            <button
+              onClick={onDelete}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="flex-1 text-left">Excluir Usuário</span>
+            </button>
           </div>
         </div>
       )}
@@ -516,6 +553,148 @@ function MenuButton({
   );
 }
 
+function AgencySelect({
+  value,
+  onChange,
+  disabled = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState('');
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selectedLabel =
+    !value || value === NO_AGENCY_VALUE
+      ? ''
+      : AGENCY_OPTIONS.find((a) => a === value) ?? '';
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) setTerm('');
+  }, [open]);
+
+  const normalized = term.trim().toLowerCase();
+  const filtered = AGENCY_OPTIONS.filter((a) =>
+    normalized ? a.toLowerCase().includes(normalized) : true,
+  );
+
+  const handleSelect = (val: string) => {
+    onChange(val);
+    setOpen(false);
+    setTerm('');
+  };
+
+  return (
+    <div ref={rootRef} className="relative">
+      <div
+        className={`flex items-center gap-2 rounded-xl border bg-white px-3 py-2.5 transition dark:bg-[#121212] ${
+          disabled
+            ? 'cursor-not-allowed opacity-50'
+            : open
+              ? 'border-[#39FF14]/60 ring-2 ring-[#39FF14]/20 dark:border-[#39FF14]/60'
+              : 'border-gray-200 dark:border-white/10'
+        }`}
+        onClick={() => {
+          if (disabled) return;
+          setOpen(true);
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          disabled={disabled}
+          value={open ? term : selectedLabel}
+          onFocus={() => !disabled && setOpen(true)}
+          onChange={(e) => {
+            setTerm(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          placeholder={
+            disabled
+              ? 'Indisponível para este papel'
+              : value === NO_AGENCY_VALUE
+                ? NO_AGENCY_LABEL
+                : 'Buscar agência vinculada...'
+          }
+          className="flex-1 bg-transparent text-sm font-semibold text-gray-900 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed dark:text-white dark:placeholder:text-slate-500"
+        />
+        {open ? (
+          <Search className="h-4 w-4 text-[#39FF14]" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-gray-400 dark:text-slate-500" />
+        )}
+      </div>
+
+      {open && !disabled && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#1E1E24]">
+          <button
+            type="button"
+            onClick={() => handleSelect(NO_AGENCY_VALUE)}
+            className={`flex w-full items-center justify-between gap-2 border-b border-gray-100 px-3 py-2 text-left text-sm font-semibold transition hover:bg-[#39FF14]/10 hover:text-[#39FF14] dark:border-white/5 ${
+              value === NO_AGENCY_VALUE
+                ? 'bg-[#39FF14]/10 text-[#39FF14]'
+                : 'text-gray-600 dark:text-slate-300'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <X className="h-3.5 w-3.5" />
+              {NO_AGENCY_LABEL}
+            </span>
+            {value === NO_AGENCY_VALUE && <Check className="h-3.5 w-3.5" />}
+          </button>
+          {filtered.length === 0 ? (
+            <p className="px-3 py-6 text-center text-sm text-gray-500 dark:text-slate-400">
+              Nenhuma agência encontrada.
+            </p>
+          ) : (
+            <>
+              <p className="sticky top-0 bg-gray-50/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500 backdrop-blur dark:bg-[#14141A]/90 dark:text-slate-400">
+                Agências cadastradas
+              </p>
+              <ul>
+                {filtered.map((item) => {
+                  const selected = item === value;
+                  return (
+                    <li key={item}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(item)}
+                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-[#39FF14]/10 hover:text-[#39FF14] ${
+                          selected
+                            ? 'bg-[#39FF14]/10 text-[#39FF14]'
+                            : 'text-gray-800 dark:text-slate-200'
+                        }`}
+                      >
+                        <span className="truncate">{item}</span>
+                        {selected && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EditUserModal({
   user,
   onClose,
@@ -527,8 +706,9 @@ function EditUserModal({
 }) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
-  const [parent, setParent] = useState(user.parent_agency);
+  const [parent, setParent] = useState(user.parent_agency || NO_AGENCY_VALUE);
   const [deal, setDeal] = useState('CPA R$ 250 + 25% Rev');
+  const agencyAllowed = ROLES_WITH_AGENCY.includes(user.role);
 
   return (
     <Modal onClose={onClose} title="Editar Usuário" subtitle={`Atualize os dados de ${user.name}`}>
@@ -537,7 +717,7 @@ function EditUserModal({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
         <Field label="E-mail">
@@ -545,21 +725,19 @@ function EditUserModal({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
-        <Field label="Agência Vinculada">
-          <input
-            value={parent}
-            onChange={(e) => setParent(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
-          />
-        </Field>
+        {agencyAllowed && (
+          <Field label="Agência Vinculada">
+            <AgencySelect value={parent} onChange={setParent} />
+          </Field>
+        )}
         <Field label="Repasse (Deal)">
           <input
             value={deal}
             onChange={(e) => setDeal(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
       </div>
@@ -571,7 +749,13 @@ function EditUserModal({
           Cancelar
         </button>
         <button
-          onClick={() => onSave({ name, email, parent_agency: parent })}
+          onClick={() =>
+            onSave({
+              name,
+              email,
+              parent_agency: agencyAllowed ? parent : NO_AGENCY_VALUE,
+            })
+          }
           className="inline-flex items-center gap-2 rounded-xl bg-[#39FF14] px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-950 shadow-[0_0_18px_rgba(57,255,20,0.35)] transition hover:bg-neon-300"
         >
           <Check className="h-4 w-4" />
@@ -592,7 +776,8 @@ function AddUserModal({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<Role>('AFFILIATE');
-  const [parent, setParent] = useState('');
+  const [parent, setParent] = useState<string>(NO_AGENCY_VALUE);
+  const agencyAllowed = ROLES_WITH_AGENCY.includes(role);
   const disabled = !name.trim() || !email.trim();
 
   return (
@@ -608,7 +793,7 @@ function AddUserModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ex: João Afiliado"
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
         <Field label="E-mail">
@@ -617,30 +802,31 @@ function AddUserModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="joao@afiliados.com"
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           />
         </Field>
         <Field label="Papel">
           <select
             value={role}
-            onChange={(e) => setRole(e.target.value as Role)}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
+            onChange={(e) => {
+              const next = e.target.value as Role;
+              setRole(next);
+              if (!ROLES_WITH_AGENCY.includes(next)) setParent(NO_AGENCY_VALUE);
+            }}
+            className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 focus:border-[#39FF14]/60 focus:outline-none focus:ring-2 focus:ring-[#39FF14]/20 dark:border-white/10 dark:bg-[#121212] dark:text-white"
           >
             {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
-              <option key={r} value={r} className="bg-white text-gray-800 dark:bg-[#1E1E24] dark:text-slate-200">
+              <option key={r} value={r} className="bg-white text-gray-800 dark:bg-[#121212] dark:text-slate-200">
                 {ROLE_LABEL[r]}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Agência Vinculada (opcional)">
-          <input
-            value={parent}
-            onChange={(e) => setParent(e.target.value)}
-            placeholder="Ex: Agência Tubarões Media"
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-neon-400/50 focus:outline-none focus:ring-2 focus:ring-neon-400/20 dark:border-white/10 dark:bg-slate-900/70 dark:text-white"
-          />
-        </Field>
+        {agencyAllowed && (
+          <Field label="Agência Vinculada">
+            <AgencySelect value={parent} onChange={setParent} />
+          </Field>
+        )}
       </div>
       <div className="mt-6 flex items-center justify-end gap-2">
         <button
@@ -651,7 +837,14 @@ function AddUserModal({
         </button>
         <button
           disabled={disabled}
-          onClick={() => onCreate({ name, email, role, parent_agency: parent })}
+          onClick={() =>
+            onCreate({
+              name,
+              email,
+              role,
+              parent_agency: agencyAllowed ? parent : NO_AGENCY_VALUE,
+            })
+          }
           className="inline-flex items-center gap-2 rounded-xl bg-[#39FF14] px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-slate-950 shadow-[0_0_18px_rgba(57,255,20,0.35)] transition hover:bg-neon-300 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
         >
           <Plus className="h-4 w-4" />
