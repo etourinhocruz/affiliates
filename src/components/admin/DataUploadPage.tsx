@@ -1,12 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import {
-  CheckCircle2,
   ChevronDown,
   ClipboardList,
   Database,
   FileSpreadsheet,
-  History,
   Trash2,
   UploadCloud,
   Zap,
@@ -29,45 +27,6 @@ type CampaignRow = {
   ftd: string;
   revenue: string;
 };
-
-type UploadLog = {
-  id: string;
-  house: string;
-  reportDate: string;
-  uploadedAt: string;
-  status: 'success' | 'pending' | 'failed';
-};
-
-const MOCK_LOGS: UploadLog[] = [
-  {
-    id: 'log-1',
-    house: 'Superbet',
-    reportDate: '19/04/2026',
-    uploadedAt: '20/04/2026 08:42',
-    status: 'success',
-  },
-  {
-    id: 'log-2',
-    house: 'BetMGM',
-    reportDate: '19/04/2026',
-    uploadedAt: '20/04/2026 08:55',
-    status: 'success',
-  },
-  {
-    id: 'log-3',
-    house: 'Novibet',
-    reportDate: '18/04/2026',
-    uploadedAt: '19/04/2026 09:10',
-    status: 'success',
-  },
-  {
-    id: 'log-4',
-    house: 'BetFair',
-    reportDate: '18/04/2026',
-    uploadedAt: '19/04/2026 09:18',
-    status: 'success',
-  },
-];
 
 function pick(obj: Record<string, string>, keys: string[]): string {
   for (const k of keys) {
@@ -262,7 +221,7 @@ export default function DataUploadPage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-6">
         <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#1E1E24]/80 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] backdrop-blur-xl">
           <div className="flex flex-col gap-2 border-b border-white/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -345,73 +304,7 @@ export default function DataUploadPage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#1E1E24]/80 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-          <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neon-400/10 text-neon-300 ring-1 ring-neon-400/30">
-                <History className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white">
-                  Histórico de Atualizações
-                </h3>
-                <p className="text-[11px] text-slate-400">Últimos uploads processados</p>
-              </div>
-            </div>
-          </div>
-
-          <ul className="flex flex-col gap-3 p-4">
-            {MOCK_LOGS.map((log) => (
-              <li
-                key={log.id}
-                className="rounded-xl border border-white/5 bg-black/30 p-4 transition hover:border-neon-400/30"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-white">{log.house}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-400">
-                      Referência:{' '}
-                      <span className="font-semibold text-slate-200">
-                        {log.reportDate}
-                      </span>
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Upload:{' '}
-                      <span className="font-semibold text-slate-200">
-                        {log.uploadedAt}
-                      </span>
-                    </p>
-                  </div>
-                  <StatusPill status={log.status} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
       </div>
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: UploadLog['status'] }) {
-  if (status === 'success') {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-neon-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neon-300 ring-1 ring-neon-400/30">
-        <CheckCircle2 className="h-3 w-3" />
-        Sucesso
-      </span>
-    );
-  }
-  if (status === 'pending') {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30">
-        Pendente
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-rose-300 ring-1 ring-rose-400/30">
-      Falhou
-    </span>
   );
 }
